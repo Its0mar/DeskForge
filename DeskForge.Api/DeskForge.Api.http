@@ -1,0 +1,6 @@
+@DeskForge.Api_HostAddress = http://localhost:5098
+
+GET {{DeskForge.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

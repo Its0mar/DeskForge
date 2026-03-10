@@ -1,0 +1,46 @@
+# Build outputs
+**/bin/
+**/obj/
+**/out/
+
+# Rider / IntelliJ
+.idea/
+*.sln.iml
+
+# Visual Studio / MSBuild
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+*.dotsettings.user
+
+# ASP.NET Core
+appsettings.local.json
+usersecrets.json
+*.publish.xml
+*.pubxml
+*.pubxml.user
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# User-specific tools
+.devcontainer/
+
+# Entity Framework Core log files
+*.exe
+*.dll
+*.pdb
+
+# Local environment variables
+.env
+.env.local
+
+# Test results
+[Tt]est[Rr]esult*/

@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeskForge.Api", "DeskForge.Api\DeskForge.Api.csproj", "{EB2C7B23-D7F0-4DFF-9F95-23B8AB973289}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeskForge.Api", "src\DeskForge.Api\DeskForge.Api.csproj", "{1ED91E96-3D04-4CC6-8CAA-38177BF26BF3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -8,9 +8,9 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{EB2C7B23-D7F0-4DFF-9F95-23B8AB973289}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EB2C7B23-D7F0-4DFF-9F95-23B8AB973289}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EB2C7B23-D7F0-4DFF-9F95-23B8AB973289}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EB2C7B23-D7F0-4DFF-9F95-23B8AB973289}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1ED91E96-3D04-4CC6-8CAA-38177BF26BF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1ED91E96-3D04-4CC6-8CAA-38177BF26BF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1ED91E96-3D04-4CC6-8CAA-38177BF26BF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1ED91E96-3D04-4CC6-8CAA-38177BF26BF3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

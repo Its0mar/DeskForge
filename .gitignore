@@ -38,6 +38,8 @@ Thumbs.db
 *.dll
 *.pdb
 
+*.db
+
 # Local environment variables
 .env
 .env.local

@@ -9,6 +9,9 @@ public static class Result
     public static Created Created => default;
     public static Deleted Deleted => default;
     public static Updated Updated => default;
+    
+    //used in the ValidationMiddleware
+    public static Result<Success> Ok() => Success;
 }
 
 public sealed class Result<TValue> : IResult<TValue>
@@ -31,7 +34,7 @@ public sealed class Result<TValue> : IResult<TValue>
 
     [JsonConstructor]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("For serializer only.", true)]
+    [Obsolete("For serializer only. Do not use in application code.")]
     public Result(TValue? value, List<Error>? errors, bool isSuccess)
     {
         if (isSuccess)

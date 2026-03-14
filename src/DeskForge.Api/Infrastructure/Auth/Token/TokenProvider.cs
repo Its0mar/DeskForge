@@ -4,23 +4,26 @@ using System.Text;
 using DeskForge.Api.Common.Results;
 using DeskForge.Api.Features.Auth.Login;
 using DeskForge.Api.Features.Auth.Models;
+using DeskForge.Api.Infrastructure.Auth.Models;
 using DeskForge.Api.Infrastructure.Persistence;
+using Microsoft.CodeAnalysis.Options;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
-namespace DeskForge.Api.Infrastructure.Auth;
+namespace DeskForge.Api.Infrastructure.Auth.Token;
 
-public class TokenProvider(IConfiguration configuration, AppDbContext context) : ITokenProvider
+public class TokenProvider(IConfiguration configuration, AppDbContext context, IOptions<JwtSettings> option) : ITokenProvider
 {
+    private readonly JwtSettings _jwtSettings = option.Value;
     public async Task<Result<TokenResponse>> GenerateTokenAsync(AppUser user, CancellationToken ct)
     {
-        var jwtSettings   = configuration.GetSection("JwtSettings");
-        var key           = jwtSettings["Secret"]!;
-        var issuer        = jwtSettings["Issuer"]!;
-        var audience      = jwtSettings["Audience"]!;
-        var expiryMinutes = int.Parse(jwtSettings["TokenExpirationInMinutes"]!);
-        var expires       = DateTimeOffset.UtcNow.AddMinutes(expiryMinutes);
+        var key           = _jwtSettings.Secret;
+        var issuer        = _jwtSettings.Issuer;
+        var audience      = _jwtSettings.Audience;
+        var expiryMinutes = DateTimeOffset.UtcNow.AddMinutes(_jwtSettings.TokenExpirationInMinutes);
+        var expires = expiryMinutes.UtcDateTime;
         
         var claims = new List<Claim>
         {
@@ -35,7 +38,7 @@ public class TokenProvider(IConfiguration configuration, AppDbContext context) :
         var descriptor = new SecurityTokenDescriptor
         {
             Subject            = new ClaimsIdentity(claims),
-            Expires            = expires.UtcDateTime,
+            Expires            = expires,
             Issuer             = issuer,
             Audience           = audience,
             SigningCredentials = new SigningCredentials(

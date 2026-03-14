@@ -3,7 +3,7 @@ using DeskForge.Api.Common.Results;
 using DeskForge.Api.Features.Auth.Login;
 using DeskForge.Api.Features.Auth.Models;
 
-namespace DeskForge.Api.Infrastructure.Auth;
+namespace DeskForge.Api.Infrastructure.Auth.Token;
 
 public interface ITokenProvider
 {

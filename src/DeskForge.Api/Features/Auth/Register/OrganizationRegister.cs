@@ -4,7 +4,9 @@ using DeskForge.Api.Common.Results;
 using DeskForge.Api.Features.Auth.Login;
 using DeskForge.Api.Features.Auth.Models;
 using DeskForge.Api.Features.Organizations;
+using DeskForge.Api.Features.Organizations.Models;
 using DeskForge.Api.Infrastructure.Auth;
+using DeskForge.Api.Infrastructure.Auth.Token;
 using DeskForge.Api.Infrastructure.Persistence;
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -24,12 +26,16 @@ public sealed class OrganizationRegisterCommandValidator : AbstractValidator<Org
 {
     public  OrganizationRegisterCommandValidator()
     {
-        RuleFor(x => x.Password).NotEmpty().MinimumLength(6);
+        RuleFor(x => x.Name).NotEmpty().MinimumLength(3);
         RuleFor(x => x.Email).NotEmpty().EmailAddress().WithMessage("A valid email address is required.");
-        
+        RuleFor(x => x.Password).NotEmpty().MinimumLength(6);
+        RuleFor(x => x.TenantCode)
+            .NotEmpty().Matches("^[a-z0-9-]+$")
+            .Must(x => !x.StartsWith("-") && !x.EndsWith("-"))
+            .WithMessage("Tenant code cannot start or end with a hyphen.");;
     }
 }
-//TODO : ADD FLUENT VALIDATION
+
 [Tags("Auth")]
 public static class OrganizationRegisterEndpoint
 {
@@ -39,14 +45,27 @@ public static class OrganizationRegisterEndpoint
         CancellationToken ct)
     {
         var emailExists = await db.Users.AsNoTracking().AnyAsync(u => u.Email == command.Email, ct);
-        
+
         if (emailExists)
+        {
             return new ProblemDetails
             {
                 Status = StatusCodes.Status409Conflict,
                 Title  = "Conflict",
                 Detail = "Email already registered."
             };
+        }
+        
+        var isTenantExist = await db.Organizations.AnyAsync(org => org.TenantCode == command.TenantCode, ct);
+        if (isTenantExist)
+        {
+            return new ProblemDetails
+            {
+                Status = StatusCodes.Status409Conflict,
+                Title = "Conflict",
+                Detail = "This tenant code is already taken."
+            };
+        }
 
         return WolverineContinue.NoProblems;
     }
@@ -59,22 +78,22 @@ public static class OrganizationRegisterEndpoint
         IMessageBus bus,
         UserManager<AppUser> userManager,
         ITokenProvider tokenProvider,
+        AppDbContext db,
         CancellationToken ct)
     {
-        var orgResult = await bus.InvokeAsync<Result<Guid>>(new CreateOrganizationCommand(command.Name, command.TenantCode), ct);
-        if (orgResult.IsError)
+        var organization = new Organization
         {
-            return TypedResults.Problem(
-                title: orgResult.TopError.Code,
-                detail: orgResult.TopError.Description,
-                statusCode: StatusCodes.Status409Conflict);
-        }
+            Name = command.Name,
+            TenantCode = command.TenantCode.ToLower().Trim()
+        };
+
+        db.Organizations.Add(organization);
         
         var user = new AppUser
         {
             UserName = command.Email,
             Email = command.Email,
-            OrganizationId = orgResult.Value,
+            OrganizationId = organization.Id,
             Role = OrgRole.Owner
         };
         
@@ -82,7 +101,17 @@ public static class OrganizationRegisterEndpoint
         if (!identityResult.Succeeded)
             return TypedResults.Problem(title: "User Creation Failed", detail: identityResult.Errors.First().Description);
 
-        var tokens = await tokenProvider.GenerateTokenAsync(user, ct);
-        return TypedResults.Ok(tokens.Value);
+        var token = await tokenProvider.GenerateTokenAsync(user, ct);
+
+        if (token.IsError)
+        {
+            return TypedResults.Problem(
+                title: "Auth Error", 
+                detail: token.TopError.Description, 
+                statusCode: 500);
+        }
+        
+        return TypedResults.Ok(token.Value);
     }
+    
 }

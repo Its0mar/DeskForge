@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using DeskForge.Api.Common.Enums;
+using DeskForge.Api.Infrastructure.Auth.Models;
 
 namespace DeskForge.Api.Infrastructure.Auth;
 

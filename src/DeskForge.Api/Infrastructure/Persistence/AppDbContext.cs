@@ -1,12 +1,15 @@
 using DeskForge.Api.Common.Entities;
+using DeskForge.Api.Features.Auth.Models;
 using DeskForge.Api.Features.Organizations.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace DeskForge.Api.Infrastructure.Persistence;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<AppUser>(options)
 {
-    public DbSet<Organization>  Organizations { get; set; }
+    public DbSet<Organization>  Organizations => Set<Organization>();
+    public DbSet<RefreshToken> RefreshTokens  => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

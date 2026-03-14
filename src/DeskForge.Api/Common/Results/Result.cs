@@ -9,9 +9,6 @@ public static class Result
     public static Created Created => default;
     public static Deleted Deleted => default;
     public static Updated Updated => default;
-    
-    //used in the ValidationMiddleware
-    public static Result<Success> Ok() => Success;
 }
 
 public sealed class Result<TValue> : IResult<TValue>

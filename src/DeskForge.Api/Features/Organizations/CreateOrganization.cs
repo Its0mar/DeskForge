@@ -1,54 +1,49 @@
-using DeskForge.Api.Common.Controllers;
-using DeskForge.Api.Common.Extensions;
+using System.Diagnostics.CodeAnalysis;
 using DeskForge.Api.Common.Results;
 using DeskForge.Api.Features.Organizations.Models;
 using DeskForge.Api.Infrastructure.Persistence;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Wolverine;
+using Wolverine.Http;
 
 namespace DeskForge.Api.Features.Organizations;
 
+[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
 public sealed record CreateOrganizationCommand(string Name, string TenantCode);
 
 public sealed class CreateOrganizationCommandValidator : AbstractValidator<CreateOrganizationCommand>
 {
     public CreateOrganizationCommandValidator()
     {
-        RuleFor(x => x.Name)
-            .NotEmpty().WithMessage("Name is required")
-            .MinimumLength(3).WithMessage("Name must be at least 3 characters long")
-            .MaximumLength(100).WithMessage("Name must be less than 100 characters long");
-        
+        RuleFor(x => x.Name).NotEmpty().MinimumLength(3);
         RuleFor(x => x.TenantCode)
-            .NotEmpty().WithMessage("Tenant code must be provided")
-            .MinimumLength(3).WithMessage("Tenant Code must be at least 3 characters long")
-            .MaximumLength(100).WithMessage("Tenant Code must be less than 100 characters long")
-            .Matches("^[a-z0-9-]+$").WithMessage("Tenant code can only contain lowercase letters, numbers, and hyphens.");
+            .NotEmpty().Matches("^[a-z0-9-]+$")
+            .Must(x => !x.StartsWith("-") && !x.EndsWith("-"))
+            .WithMessage("Tenant code cannot start or end with a hyphen.");;
     }
 }
 
-public sealed class CreateOrganizationCommandHandler(
-    AppDbContext context,
-    IValidator<CreateOrganizationCommand> validator,
-    ILogger<CreateOrganizationCommandHandler> logger)
+public static class CreateOrganizationHandler
 {
-    public async Task<Result<Guid>> Handle(CreateOrganizationCommand command, CancellationToken ct)
+    public static async Task<ProblemDetails> ValidateAsync(CreateOrganizationCommand command, AppDbContext context, CancellationToken ct)
     {
-        var validationResult = await validator.ValidateAsync(command, ct);
-        if (!validationResult.IsValid)
-        {
-            return validationResult.ToErrors();
-        }
-        
         var isTenantExist = await context.Organizations.AnyAsync(org => org.TenantCode == command.TenantCode, ct);
-
         if (isTenantExist)
         {
-            return Error.Failure("Org.Duplicate", "This tenant code is already taken.");
+            return new ProblemDetails
+            {
+                Status = StatusCodes.Status409Conflict,
+                Title = "Conflict",
+                Detail = "This tenant code is already taken."
+            };
         }
 
+        return WolverineContinue.NoProblems;
+    }
+
+    public static async Task<Result<Guid>> Handle(CreateOrganizationCommand command, AppDbContext context, CancellationToken ct)
+    {
         var organization = new Organization
         {
             Name = command.Name,
@@ -59,17 +54,5 @@ public sealed class CreateOrganizationCommandHandler(
         await context.SaveChangesAsync(ct);
 
         return organization.Id;
-    }
-}
-
-public class CreateOrganizationController(IMessageBus bus) : ApiController 
-{
-    [HttpPost("api/organizations/create")]
-    public async Task<ActionResult> Create([FromBody]CreateOrganizationCommand command, CancellationToken ct)
-    {
-        var result = await bus.InvokeAsync<Result<Guid>>(command, ct);
-        return result.Match(
-            response => Ok(result),
-            Problem);
     }
 }

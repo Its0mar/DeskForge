@@ -1,6 +1,6 @@
 using System.Security.Claims;
+using DeskForge.Api.Common.Dtos;
 using DeskForge.Api.Common.Results;
-using DeskForge.Api.Features.Auth.Login;
 using DeskForge.Api.Features.Auth.Models;
 
 namespace DeskForge.Api.Infrastructure.Auth.Token;

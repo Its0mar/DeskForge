@@ -1,4 +1,4 @@
-namespace DeskForge.Api.Features.Auth.Login;
+namespace DeskForge.Api.Common.Dtos;
 
 public sealed record TokenResponse(
     string AccessToken,

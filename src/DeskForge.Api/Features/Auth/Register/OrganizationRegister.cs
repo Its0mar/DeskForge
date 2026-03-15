@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
+using DeskForge.Api.Common.Dtos;
 using DeskForge.Api.Common.Enums;
 using DeskForge.Api.Common.Results;
-using DeskForge.Api.Features.Auth.Login;
 using DeskForge.Api.Features.Auth.Models;
 using DeskForge.Api.Features.Organizations;
 using DeskForge.Api.Features.Organizations.Models;

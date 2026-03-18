@@ -9,7 +9,7 @@ public static class UserContextMiddleware
     public static UserContext Load(ClaimsPrincipal principal)
     {
         if (principal.Identity?.IsAuthenticated is not true)
-            return new UserContext(Guid.Empty, Guid.Empty, OrgRole.Customer);
+            return new UserContext{UserId = Guid.Empty, OrganizationId = Guid.Empty, Role = OrgRole.Customer};
 
         Guid.TryParse(
             principal.FindFirstValue(ClaimTypes.NameIdentifier), out var userId);
@@ -20,6 +20,6 @@ public static class UserContextMiddleware
         Enum.TryParse<OrgRole>(
             principal.FindFirstValue("org_role"), out var role);
 
-        return new UserContext(userId, orgId, role);
+        return new UserContext{UserId = userId, OrganizationId = orgId, Role = role};
     }
 }

@@ -20,13 +20,15 @@ using Wolverine.Http;
 namespace DeskForge.Api.Features.Auth.Register;
 
 [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-public record OrganizationRegisterCommand(string Name, string Password, string TenantCode, string Email);
+public record OrganizationRegisterCommand(string Name, string FirstName, string LastName, string TenantCode, string Email, string Password);
 
 public sealed class OrganizationRegisterCommandValidator : AbstractValidator<OrganizationRegisterCommand>
 {
     public  OrganizationRegisterCommandValidator()
     {
-        RuleFor(x => x.Name).NotEmpty().MinimumLength(3);
+        RuleFor(x => x.Name).NotEmpty().MinimumLength(3).MaximumLength(50);
+        RuleFor(x => x.FirstName).NotEmpty().MinimumLength(3).MaximumLength(20);
+        RuleFor(x => x.LastName).NotEmpty().MinimumLength(3).MaximumLength(20);
         RuleFor(x => x.Email).NotEmpty().EmailAddress().WithMessage("A valid email address is required.");
         RuleFor(x => x.Password).NotEmpty().MinimumLength(6);
         RuleFor(x => x.TenantCode)
@@ -92,6 +94,8 @@ public static class OrganizationRegisterEndpoint
         var user = new AppUser
         {
             UserName = command.Email,
+            FirstName = command.FirstName,
+            LastName = command.LastName,
             Email = command.Email,
             OrganizationId = organization.Id,
             Role = OrgRole.Owner

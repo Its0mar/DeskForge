@@ -16,20 +16,15 @@ public static class DependencyInjection
         this IServiceCollection services, 
         IConfiguration configuration)
     {
-        // 1. Database Setup
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
-        
+        // 1. Persistence
         services.AddDbContext<AppDbContext>(options => 
-            options.UseSqlite(connectionString));
+            options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
 
-        // 2. JWT Settings & Validation
-        services.AddOptions<JwtSettings>()
-            .Bind(configuration.GetSection(JwtSettings.SectionName))
-            .ValidateOnStart();
+        // 2. Strongly Typed Configurations
+        services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
+        // services.Configure<InviteSettings>(configuration.GetSection(InviteSettings.SectionName));
 
-        var jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>();
-
-        // 3. ASP.NET Core Identity
+        // 3. Identity
         services.AddIdentityCore<AppUser>(options =>
             {
                 options.Password.RequireDigit = false;
@@ -40,31 +35,38 @@ public static class DependencyInjection
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
 
-        // 4. Authentication & JWT Bearer
-        services.AddAuthentication(options => {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
-        .AddJwtBearer(options =>
-        {
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = jwtSettings?.Issuer,
-                ValidAudience = jwtSettings?.Audience,
-                IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(jwtSettings?.Secret ?? "DefaultSecretKeyForValidationFallback"))
-            };
-        });
+        // 4. Authentication
+        AddAuth(services, configuration);
 
-        services.AddAuthorization();
-        
-        // 5. Custom services
+        // 5. Infrastructure Services
         services.AddScoped<ITokenProvider, TokenProvider>();
+        services.AddScoped<UserContext>();
+        
+        services.AddHttpContextAccessor();
 
         return services;
+    }
+
+    private static void AddAuth(IServiceCollection services, IConfiguration configuration)
+    {
+        var jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>();
+
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtSettings?.Issuer,
+                    ValidAudience = jwtSettings?.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtSettings?.Secret ?? "YourSuperSecretKeyGoesHere"))
+                };
+            });
+
+        services.AddAuthorization();
     }
 }

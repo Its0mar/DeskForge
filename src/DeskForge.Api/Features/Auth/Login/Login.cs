@@ -1,9 +1,11 @@
 using DeskForge.Api.Common.Dtos;
 using DeskForge.Api.Features.Auth.Models;
 using DeskForge.Api.Infrastructure.Auth.Token;
+using DeskForge.Api.Infrastructure.Persistence;
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Wolverine.Http;
 
 namespace DeskForge.Api.Features.Auth.Login;
@@ -28,9 +30,14 @@ public static class LoginEndpoint
         LoginCommand command,
         UserManager<AppUser> userManager,
         ITokenProvider tokenProvider,
+        AppDbContext db,
         CancellationToken ct)
     {
-        var user = await userManager.FindByEmailAsync(command.Email);
+        var user = await db.Users
+            .AsNoTracking() 
+            .FirstOrDefaultAsync(u => u.Email == command.Email, ct);
+        
+        // var user = await userManager.FindByEmailAsync(command.Email);
 
         if (user is null)
         {

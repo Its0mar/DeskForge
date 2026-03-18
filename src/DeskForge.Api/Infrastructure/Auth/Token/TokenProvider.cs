@@ -30,8 +30,8 @@ public class TokenProvider(IConfiguration configuration, AppDbContext context, I
             new(JwtRegisteredClaimNames.Sub,   user.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, user.Email!),
             new(JwtRegisteredClaimNames.Jti,   Guid.NewGuid().ToString()),
+            new(ClaimTypes.Role,               user.Role.ToString()),
             new("org_id",                      user.OrganizationId.ToString()),
-            new("org_role",                    user.Role.ToString())
         };
         
         // Create access token

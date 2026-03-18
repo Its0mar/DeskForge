@@ -1,6 +1,15 @@
-@DeskForge.Api_HostAddress = http://localhost:5098
+@BaseUrl = http://localhost:5098
 
-GET {{DeskForge.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+
+POST {BaeUrl}/api/auth/organization/register/
+
+{
+  "name": "comp1",
+  "firstName": "com",
+  "lastName": "coom",
+  "tenantCode": "comp1",
+  "email": "comp1@gmail.com",
+  "password": "comp1234"
+}
 
 ###

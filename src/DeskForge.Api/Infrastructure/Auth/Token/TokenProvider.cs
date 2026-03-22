@@ -26,7 +26,7 @@ public class TokenProvider(IConfiguration configuration, AppDbContext context, I
         var expires = expiryMinutes.UtcDateTime;
         
         var claims = new List<Claim>
-        {
+        {   
             new(JwtRegisteredClaimNames.Sub,   user.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, user.Email!),
             new(JwtRegisteredClaimNames.Jti,   Guid.NewGuid().ToString()),
@@ -49,18 +49,20 @@ public class TokenProvider(IConfiguration configuration, AppDbContext context, I
         var handler       = new JwtSecurityTokenHandler();
         var accessToken   = handler.WriteToken(handler.CreateToken(descriptor));
         
-        await context.Set<RefreshToken>()
-            .Where(rt => rt.UserId == user.Id.ToString())
+        var now = DateTimeOffset.UtcNow;
+        await context.RefreshTokens
+            .Where(rt => rt.UserId == user.Id 
+                         && (rt.IsRevoked || rt.ExpiresOnUtc < now))
             .ExecuteDeleteAsync(ct);
-
+        
         var refreshResult = RefreshToken.Create(
-            user.Id.ToString(),
+            user.Id,
             DateTimeOffset.UtcNow.AddDays(7));
 
         if (refreshResult.IsError)
             return refreshResult.Errors!;
 
-        context.Set<RefreshToken>().Add(refreshResult.Value!);
+        await context.RefreshTokens.AddAsync(refreshResult.Value!, ct);
         await context.SaveChangesAsync(ct);
 
         return new TokenResponse(accessToken, refreshResult.Value!.Token, expires);
@@ -73,11 +75,11 @@ public class TokenProvider(IConfiguration configuration, AppDbContext context, I
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey         = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(configuration["JwtSettings:Secret"]!)),
+                Encoding.UTF8.GetBytes(_jwtSettings.Secret)),
             ValidateIssuer   = true,
-            ValidIssuer      = configuration["JwtSettings:Issuer"],
+            ValidIssuer      = _jwtSettings.Issuer,
             ValidateAudience = true,
-            ValidAudience    = configuration["JwtSettings:Audience"],
+            ValidAudience    = _jwtSettings.Audience,
             ValidateLifetime = false
         };
 

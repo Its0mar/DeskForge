@@ -4,12 +4,12 @@ using DeskForge.Api.Infrastructure.Auth.Models;
 
 namespace DeskForge.Api.Infrastructure.Auth;
 
-public static class UserContextMiddleware
+public static class ClaimsPrincipalParserMiddleware
 {
     public static UserContext Load(ClaimsPrincipal principal)
     {
         if (principal.Identity?.IsAuthenticated is not true)
-            return new UserContext{UserId = Guid.Empty, OrganizationId = Guid.Empty, Role = OrgRole.Customer};
+            return new UserContext{UserId = Guid.Empty, OrganizationId = Guid.Empty, Role = OrgRole.Requester};
 
         Guid.TryParse(
             principal.FindFirstValue(ClaimTypes.NameIdentifier), out var userId);

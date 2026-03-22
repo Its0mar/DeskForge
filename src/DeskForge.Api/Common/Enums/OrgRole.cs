@@ -5,5 +5,5 @@ public enum OrgRole
     Owner, 
     Manager,
     Staff,
-    Customer
+    Requester
 }

@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using System.Text;
+using DeskForge.Api.Common.Enums;
 using DeskForge.Api.Features.Auth.Models;
 using DeskForge.Api.Infrastructure.Auth.Models;
 using DeskForge.Api.Infrastructure.Auth.Token;
@@ -67,6 +69,16 @@ public static class DependencyInjection
                 };
             });
 
-        services.AddAuthorization();
+        services.AddAuthorization(opts =>
+        {
+            opts.AddPolicy("OwnerOrManager", policy =>
+                policy.RequireClaim(ClaimTypes.Role,
+                    nameof(OrgRole.Owner),
+                    nameof(OrgRole.Manager)));
+
+            opts.AddPolicy("OwnerOnly", policy =>
+                policy.RequireClaim("org_role",
+                    nameof(OrgRole.Owner)));
+        });
     }
 }

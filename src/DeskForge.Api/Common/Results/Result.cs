@@ -5,10 +5,10 @@ namespace DeskForge.Api.Common.Results;
 
 public static class Result
 {
-    public static Success Success => default;
-    public static Created Created => default;
-    public static Deleted Deleted => default;
-    public static Updated Updated => default;
+    public static Result<Success> Success => new Success();
+    public static Result<Created> Created => new Created();
+    public static Result<Deleted> Deleted => new Deleted();
+    public static Result<Updated> Updated => new Updated();
 }
 
 public sealed class Result<TValue> : IResult<TValue>

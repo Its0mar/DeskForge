@@ -24,7 +24,6 @@ public sealed class SendInviteCommandValidator : AbstractValidator<SendInviteCom
         RuleFor(x => x.Email).NotNull().NotEmpty().EmailAddress().WithMessage("Please specify a valid email address");
         RuleFor(x => x.Role).NotNull().NotEmpty().WithMessage("Please specify a role");
         RuleFor(x => x.Role).NotEqual(OrgRole.Owner).WithMessage("Cannot invite another Owner.");
-        RuleFor(x => x.Role).NotEqual(OrgRole.Customer).WithMessage("Cannot invite a customer.");
     }
 }
 
@@ -70,3 +69,4 @@ public class SendInviteEndpoint
         return TypedResults.Ok(invitation.InviteToken);
     }
 }
+

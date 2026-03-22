@@ -47,7 +47,7 @@ app.MapWolverineEndpoints(opts =>
 
     opts.WarmUpRoutes = RouteWarmup.Eager;
     opts.UseFluentValidationProblemDetailMiddleware();
-    opts.AddMiddleware(typeof(UserContextMiddleware));
+    opts.AddMiddleware(typeof(ClaimsPrincipalParserMiddleware));
 });
 
 app.Run();

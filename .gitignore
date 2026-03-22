@@ -46,3 +46,5 @@ Thumbs.db
 
 # Test results
 [Tt]est[Rr]esult*/
+
+src/DeskForge.Api/Infrastructure/Persistence/Migrations

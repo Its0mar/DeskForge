@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using DeskForge.Api.Common.Dtos;
 using DeskForge.Api.Features.Auth.Models;
 using DeskForge.Api.Infrastructure.Auth.Token;
@@ -10,13 +11,14 @@ using Wolverine.Http;
 
 namespace DeskForge.Api.Features.Auth.Login;
 
-public sealed record LoginCommand(string Email, string Password);
+[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+public sealed record LoginCommand(string Identifier, string Password);
 
 public sealed class LoginCommandValidator : AbstractValidator<LoginCommand>
 {
     public LoginCommandValidator()
     {
-        RuleFor(x => x.Email).NotEmpty().EmailAddress().WithMessage("A valid email address is required.");
+        RuleFor(x => x.Identifier).NotEmpty().MinimumLength(3).MaximumLength(30);
         RuleFor(x => x.Password).NotEmpty().MinimumLength(6);
     }
 }
@@ -33,26 +35,28 @@ public static class LoginEndpoint
         AppDbContext db,
         CancellationToken ct)
     {
-        var user = await db.Users
-            .AsNoTracking() 
-            .FirstOrDefaultAsync(u => u.Email == command.Email, ct);
-        
-        // var user = await userManager.FindByEmailAsync(command.Email);
+        var user = await userManager.Users
+            .IgnoreQueryFilters() 
+            .FirstOrDefaultAsync(u => u.Email == command.Identifier || u.UserName == command.Identifier, ct);
 
-        if (user is null)
+
+        if (user is null || user.IsDeleted)
         {
             return LoginErrors.InvalidCredentials();
         }
 
-        var isPasswordValid = await userManager.CheckPasswordAsync(user, command.Password);
+        if (!user.IsActive)
+        {
+            return LoginErrors.AccountIsNotActive();
+        }
 
+        var isPasswordValid = await userManager.CheckPasswordAsync(user, command.Password);
         if (!isPasswordValid)
         {
             return LoginErrors.InvalidCredentials();
         }
 
         var tokenResult = await tokenProvider.GenerateTokenAsync(user, ct);
-
         if (tokenResult.IsError)
         {
             return LoginErrors.TokenGenerationError(tokenResult.TopError.Description);
@@ -75,4 +79,12 @@ public static class LoginErrors
             title: "Token Error",
             detail: detail,
             statusCode: StatusCodes.Status500InternalServerError);
+
+    public static ProblemHttpResult AccountIsNotActive()
+    {
+        return TypedResults.Problem(
+            title: "Account Suspended",
+            detail: "Your account has been suspended. Contact your organization owner.",
+            statusCode: StatusCodes.Status403Forbidden);
+    }
 }

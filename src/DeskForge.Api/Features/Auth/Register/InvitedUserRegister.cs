@@ -10,16 +10,17 @@ using Microsoft.EntityFrameworkCore;
 using Wolverine.Attributes;
 using Wolverine.Http;
 
-namespace DeskForge.Api.Features.Organizations.Invitations;
+namespace DeskForge.Api.Features.Auth.Register;
 
 [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-public sealed record AcceptInviteCommand(string Token,string FirstName, string LastName, string Password);
+public sealed record AcceptInviteCommand(string Token,string UserName,string FirstName, string LastName, string Password);
 
 public sealed class AcceptInviteCommandValidator : AbstractValidator<AcceptInviteCommand>
 {
     public AcceptInviteCommandValidator()
     {
         RuleFor(x => x.Token).NotEmpty();
+        RuleFor(x => x.UserName).NotEmpty().MinimumLength(3).MaximumLength(30);
         RuleFor(x => x.FirstName).NotEmpty().MinimumLength(3).MaximumLength(20);
         RuleFor(x => x.LastName).NotEmpty().MinimumLength(3).MaximumLength(20);
         RuleFor(x => x.Password).NotEmpty().MinimumLength(6);
@@ -43,15 +44,12 @@ public static class AcceptInviteEndpoint
 
         if (invite is null || !invite.IsActive)
         {
-            return TypedResults.Problem(
-                title: "Invalid Invitation", 
-                detail: "This invitation is either expired, revoked, or already used.", 
-                statusCode: StatusCodes.Status400BadRequest);
+            return InvitedUserRegisterErrors.InviteIsNullOrNotActive();
         }
 
         var appUser = new AppUser
         {
-            UserName = invite.Email,
+            UserName = command.UserName,
             Email = invite.Email,
             OrganizationId = invite.OrganizationId,
             FirstName = command.FirstName,
@@ -63,9 +61,7 @@ public static class AcceptInviteEndpoint
         
         if (!identityResult.Succeeded)
         {
-            return TypedResults.Problem(
-                title: "Registration Failed", 
-                detail: identityResult.Errors.First().Description);
+            return InvitedUserRegisterErrors.IdentityError(identityResult);
         }
         
         invite.Accept(appUser.Id);
@@ -74,5 +70,23 @@ public static class AcceptInviteEndpoint
         var token = await tokenProvider.GenerateTokenAsync(appUser, ct);
 
         return TypedResults.Ok(token.Value);
+    }
+}
+
+public static class InvitedUserRegisterErrors
+{
+    public static ProblemHttpResult InviteIsNullOrNotActive()
+    {
+        return TypedResults.Problem(
+            title: "Invalid Invitation", 
+            detail: "This invitation is either expired, revoked, or already used.", 
+            statusCode: StatusCodes.Status400BadRequest);
+    }
+
+    public static ProblemHttpResult IdentityError(IdentityResult identityResult)
+    {
+        return TypedResults.Problem(
+            title: "Registration Failed", 
+            detail: identityResult.Errors.First().Description);
     }
 }

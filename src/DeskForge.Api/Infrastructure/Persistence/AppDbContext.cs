@@ -3,6 +3,7 @@ using System.Security.Claims;
 using DeskForge.Api.Common.Abstractions;
 using DeskForge.Api.Common.Entities;
 using DeskForge.Api.Features.Auth.Models;
+using DeskForge.Api.Features.Categories.Models;
 using DeskForge.Api.Features.Organizations.Models;
 using DeskForge.Api.Features.Teams.Models;
 using Microsoft.AspNetCore.Identity;
@@ -21,6 +22,7 @@ public class AppDbContext(
     public DbSet<OrgInvite> Invitations => Set<OrgInvite>();
     public DbSet<Team> Teams  => Set<Team>();
     public DbSet<TeamMembership> TeamMemberships => Set<TeamMembership>();
+    public DbSet<Category>  Categories => Set<Category>();
     
     
     public Guid CurrentOrgId => GetGuidClaim("org_id");

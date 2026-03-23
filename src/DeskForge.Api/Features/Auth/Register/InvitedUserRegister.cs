@@ -40,7 +40,9 @@ public static class AcceptInviteEndpoint
         ITokenProvider tokenProvider,
         CancellationToken ct)
     {
-        var invite = await db.Invitations.FirstOrDefaultAsync(i => i.InviteToken == command.Token, ct);
+        var invite = await db.Invitations
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(i => i.InviteToken == command.Token, ct);
 
         if (invite is null || !invite.IsActive)
         {

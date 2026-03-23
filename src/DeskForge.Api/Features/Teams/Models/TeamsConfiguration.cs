@@ -21,3 +21,11 @@ public class TeamConfiguration : IEntityTypeConfiguration<Team>
             .OnDelete(DeleteBehavior.Cascade);
     }
 }
+
+public class TeamMembershipConfiguration : IEntityTypeConfiguration<TeamMembership>
+{
+    public void Configure(EntityTypeBuilder<TeamMembership> builder)
+    {
+        builder.HasIndex(x => new {x.TeamId, x.UserId}).IsUnique();
+    }
+}

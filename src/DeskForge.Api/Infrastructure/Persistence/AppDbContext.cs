@@ -23,7 +23,7 @@ public class AppDbContext(
     public DbSet<TeamMembership> TeamMemberships => Set<TeamMembership>();
     
     
-    public Guid CurrentOrgId => GetGuidClaim("OrganizationId");
+    public Guid CurrentOrgId => GetGuidClaim("org_id");
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

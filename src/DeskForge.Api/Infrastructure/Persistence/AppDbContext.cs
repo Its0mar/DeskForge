@@ -7,6 +7,7 @@ using DeskForge.Api.Features.Categories.Models;
 using DeskForge.Api.Features.Organizations.Models;
 using DeskForge.Api.Features.Sla.Models;
 using DeskForge.Api.Features.Teams.Models;
+using DeskForge.Api.Features.Tickets.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +26,7 @@ public class AppDbContext(
     public DbSet<TeamMembership> TeamMemberships => Set<TeamMembership>();
     public DbSet<Category>  Categories => Set<Category>();
     public DbSet<SlaPolicy> SlaPolicies => Set<SlaPolicy>();
+    public DbSet<Ticket> Tickets => Set<Ticket>();
     
     
     public Guid CurrentOrgId => GetGuidClaim("org_id");

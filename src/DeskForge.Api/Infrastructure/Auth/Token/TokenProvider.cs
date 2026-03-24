@@ -32,6 +32,7 @@ public class TokenProvider(IConfiguration configuration, AppDbContext context, I
             new(JwtRegisteredClaimNames.Jti,   Guid.NewGuid().ToString()),
             new(ClaimTypes.Role,               user.Role.ToString()),
             new("org_id",                      user.OrganizationId.ToString()),
+            new("name", $"{user.FirstName} {user.LastName}")
         };
         
         // Create access token

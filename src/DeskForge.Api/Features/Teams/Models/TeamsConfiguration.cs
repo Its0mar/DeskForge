@@ -19,6 +19,10 @@ public class TeamConfiguration : IEntityTypeConfiguration<Team>
             .WithOne()
             .HasForeignKey(m => m.TeamId)
             .OnDelete(DeleteBehavior.Cascade);
+        
+        builder.Navigation(t => t.Members)
+            .HasField("_members")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }
 
@@ -27,5 +31,15 @@ public class TeamMembershipConfiguration : IEntityTypeConfiguration<TeamMembersh
     public void Configure(EntityTypeBuilder<TeamMembership> builder)
     {
         builder.HasIndex(x => new {x.TeamId, x.UserId}).IsUnique();
+        
+        builder.HasOne(x => x.User)
+            .WithMany()
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+        
+        builder.HasOne(x => x.Team)
+            .WithMany(t => t.Members)
+            .HasForeignKey(x => x.TeamId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

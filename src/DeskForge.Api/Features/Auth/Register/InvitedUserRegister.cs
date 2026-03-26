@@ -44,7 +44,7 @@ public static class AcceptInviteEndpoint
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(i => i.InviteToken == command.Token, ct);
 
-        if (invite is null || !invite.IsActive)
+        if (invite is null || !invite.IsValid)
         {
             return InvitedUserRegisterErrors.InviteIsNullOrNotActive();
         }

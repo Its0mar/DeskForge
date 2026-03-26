@@ -19,8 +19,11 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         // 1. Persistence
-        services.AddDbContext<AppDbContext>(options => 
-            options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
+        services.AddDbContextFactory<AppDbContext>(options =>
+            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"))); 
+
+        services.AddScoped(p => 
+            p.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
 
         // 2. Strongly Typed Configurations
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));

@@ -22,7 +22,7 @@ public sealed class CreateTicketCommandValidator : AbstractValidator<CreateTicke
     public CreateTicketCommandValidator()
     {
         RuleFor(x => x.Title).Length(3,50).WithMessage("Title must be between 3 and 50 characters long.");
-        RuleFor(x => x.Description).Length(20,1000).WithMessage("Description must be between 3 and 1000 characters long.");
+        RuleFor(x => x.Description).Length(20,1000).WithMessage("Description must be between 20 and 1000 characters long.");
         RuleFor(x => x.Priority).IsInEnum().WithMessage("Priority is invalid.");
     }
 }

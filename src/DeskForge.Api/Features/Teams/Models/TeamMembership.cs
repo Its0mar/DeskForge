@@ -1,4 +1,5 @@
 using DeskForge.Api.Common.Entities;
+using DeskForge.Api.Features.Auth.Models;
 
 namespace DeskForge.Api.Features.Teams.Models;
 
@@ -9,6 +10,9 @@ public class TeamMembership : Entity
     public Guid AddedByUserId { get; set; }
     public DateTime JoinedAtUtc { get; set; }
     public bool IsActive { get; set; }
+    
+    public AppUser User { get; private set; } = null!;
+    public Team Team { get; private set; } = null!;
     
     private TeamMembership()
     { }

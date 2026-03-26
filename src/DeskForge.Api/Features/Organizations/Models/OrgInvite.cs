@@ -10,10 +10,9 @@ public class OrgInvite : AuditableEntity
     public DateTimeOffset ExpiresAtUtc { get; private init;}
     public OrgRole Role { get; private set; }
     public Guid? CreatedUserId { get; private set; } 
-    public Guid OrganizationId { get; private set; } 
     public bool IsRevoked { get; private set; } =  false;
     public bool IsAccepted => CreatedUserId.HasValue;
-    public bool IsActive => !IsRevoked && !IsAccepted && DateTimeOffset.UtcNow < ExpiresAtUtc;
+    public bool IsValid => !IsRevoked && !IsAccepted && DateTimeOffset.UtcNow < ExpiresAtUtc;
     
     private OrgInvite()
     { }
@@ -32,7 +31,7 @@ public class OrgInvite : AuditableEntity
     
     public void Accept(Guid createdUserId)
     {
-        if (IsActive)
+        if (IsValid)
         {
             CreatedUserId = createdUserId;
         }

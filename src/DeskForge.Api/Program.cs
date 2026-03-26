@@ -18,6 +18,7 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Host.UseWolverine(opts =>
 {
     opts.Discovery.IncludeAssembly(typeof(Program).Assembly);
+    // opts.Policies.AutoApplyTransactions();
 });
 
 builder.Services.AddWolverineHttp();

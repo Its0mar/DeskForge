@@ -19,10 +19,7 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
             .IsRequired();
 
         builder.Property(x => x.ExpiresOnUtc)
-            .IsRequired()
-            .HasConversion(
-                v => v.UtcDateTime,           // DateTimeOffset → DateTime (stored in SQLite)
-                v => new DateTimeOffset(v, TimeSpan.Zero));  // DateTime → DateTimeOffset (read back)
+            .IsRequired();
 
         builder.Property(x => x.IsRevoked)
             .HasDefaultValue(false);

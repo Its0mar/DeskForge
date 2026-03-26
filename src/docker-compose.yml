@@ -1,0 +1,14 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: deskforge_db
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=DeskForge_Pass123!
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql # This keeps your data even if you delete the container
+
+volumes:
+  sql_data:

@@ -27,6 +27,7 @@ public class AppDbContext(
     public DbSet<Category>  Categories => Set<Category>();
     public DbSet<SlaPolicy> SlaPolicies => Set<SlaPolicy>();
     public DbSet<Ticket> Tickets => Set<Ticket>();
+    public DbSet<TicketComment> TicketComments => Set<TicketComment>();
     
     
     public Guid CurrentOrgId => GetGuidClaim("org_id");

@@ -1,3 +1,4 @@
+import LoginPage from "./features/auth/pages/LoginPage"
 
 
 function App() {
@@ -5,7 +6,7 @@ function App() {
 
   return (
     <>
-      <h1>Hello World</h1>
+      <LoginPage />
     </>
   )
 }

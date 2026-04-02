@@ -10,6 +10,18 @@ using Wolverine.Http.FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:5173")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
+});
+
 // 1. Serilog Setup
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
@@ -37,6 +49,8 @@ builder.Services.AddOpenApi();
 
 // 2. The Build
 var app = builder.Build();
+
+app.UseCors("AllowReactApp");
 
 // 3. The Middleware Pipeline
 app.UseExceptionHandler();

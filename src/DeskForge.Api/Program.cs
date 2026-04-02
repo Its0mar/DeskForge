@@ -3,13 +3,23 @@ using DeskForge.Api.Infrastructure.Auth;
 using DeskForge.Api.Infrastructure.Exceptions;
 using FluentValidation;
 using Scalar.AspNetCore;
+using Serilog;
 using Wolverine;
 using Wolverine.Http;
 using Wolverine.Http.FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Service Registrations
+// 1. Serilog Setup
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
+// 2. Service Registrations
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddProblemDetails();

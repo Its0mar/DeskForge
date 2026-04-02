@@ -1,5 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using DeskForge.Api.Common.Dtos;
+using DeskForge.Api.Common.Models;
 using DeskForge.Api.Features.Auth.Models;
 using DeskForge.Api.Infrastructure.Auth.Token;
 using DeskForge.Api.Infrastructure.Persistence;
@@ -33,35 +33,42 @@ public static class LoginEndpoint
         UserManager<AppUser> userManager,
         ITokenProvider tokenProvider,
         AppDbContext db,
+        ILogger<LoginCommand> logger,
         CancellationToken ct)
     {
         var user = await userManager.Users
-            .IgnoreQueryFilters() 
+            .IgnoreQueryFilters()
+            .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Email == command.Identifier || u.UserName == command.Identifier, ct);
-
 
         if (user is null || user.IsDeleted)
         {
+            logger.LogWarning("Login failed: identifier {Identifier} not found or deleted", command.Identifier);
             return LoginErrors.InvalidCredentials();
         }
 
         if (!user.IsActive)
         {
+            logger.LogWarning("Login blocked: User {UserId} account is suspended", user.Id);
             return LoginErrors.AccountIsNotActive();
         }
 
         var isPasswordValid = await userManager.CheckPasswordAsync(user, command.Password);
         if (!isPasswordValid)
         {
+            logger.LogWarning("Login failed: invalid password attempt for User {UserId}", user.Id);
             return LoginErrors.InvalidCredentials();
         }
 
         var tokenResult = await tokenProvider.GenerateTokenAsync(user, ct);
         if (tokenResult.IsError)
         {
+            logger.LogError("Token generation failed for User {UserId}: {Error}", user.Id, tokenResult.TopError.Description);
             return LoginErrors.TokenGenerationError(tokenResult.TopError.Description);
         }
 
+        logger.LogInformation("User {UserId} logged in successfully from Org {OrgId}", user.Id, user.OrganizationId);
+        
         return TypedResults.Ok(tokenResult.Value);
     }
 }

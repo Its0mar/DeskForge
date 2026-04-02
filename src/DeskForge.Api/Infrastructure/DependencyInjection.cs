@@ -48,6 +48,7 @@ public static class DependencyInjection
         services.AddScoped<UserContext>();
         
         services.AddHttpContextAccessor();
+        services.AddMemoryCache();
 
         return services;
     }

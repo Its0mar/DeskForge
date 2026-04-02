@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
-using DeskForge.Api.Common.Dtos;
 using DeskForge.Api.Common.Enums;
+using DeskForge.Api.Common.Models;
 using DeskForge.Api.Common.Results;
 using DeskForge.Api.Features.Auth.Models;
 using DeskForge.Api.Features.Organizations;
@@ -20,7 +20,7 @@ using Wolverine.Http;
 namespace DeskForge.Api.Features.Auth.Register;
 
 [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-public record OrganizationRegisterCommand(string Name, string UserName, string FirstName, string LastName, string TenantCode, string Email, string Password);
+public sealed record OrganizationRegisterCommand(string Name, string UserName, string FirstName, string LastName, string TenantCode, string Email, string Password);
 
 public sealed class OrganizationRegisterCommandValidator : AbstractValidator<OrganizationRegisterCommand>
 {
@@ -82,6 +82,7 @@ public static class OrganizationRegisterEndpoint
         UserManager<AppUser> userManager,
         ITokenProvider tokenProvider,
         AppDbContext db,
+        ILogger<OrganizationRegisterCommand> logger,
         CancellationToken ct)
     {
         var organization = new Organization
@@ -104,17 +105,25 @@ public static class OrganizationRegisterEndpoint
         
         var identityResult = await userManager.CreateAsync(user, command.Password);
         if (!identityResult.Succeeded)
+        {
+            logger.LogWarning("Org registration failed for {Email}: {Error}", command.Email, identityResult.Errors.First().Description);
             return TypedResults.Problem(title: "User Creation Failed", detail: identityResult.Errors.First().Description);
+        }
 
         var token = await tokenProvider.GenerateTokenAsync(user, ct);
 
         if (token.IsError)
         {
+            logger.LogError("Token generation failed during org registration for {Email}: {Error}", command.Email, token.TopError.Description);
             return TypedResults.Problem(
                 title: "Auth Error", 
                 detail: token.TopError.Description, 
                 statusCode: 500);
         }
+
+        logger.LogInformation(
+            "New organization registered: Org {OrgId} (Tenant: {TenantCode}), Owner {UserId}",
+            organization.Id, organization.TenantCode, user.Id);
         
         return TypedResults.Ok(token.Value);
     }

@@ -1,7 +1,10 @@
 import axios from 'axios';
+import { API_ROUTES } from './apiRoutes';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export const apiClient = axios.create({
-    baseURL: 'http://localhost:5098/api', 
+    baseURL: API_BASE_URL, 
     headers: {
         'Content-Type': 'application/json',
     }
@@ -20,12 +23,14 @@ apiClient.interceptors.response.use(
 
     async (error) => {
         const originalRequest = error.config;
-        const isAuthEndpoint = originalRequest.url?.includes('/auth/login') || originalRequest.url?.includes('/auth/refresh');
+        const isAuthEndpoint = 
+            originalRequest.url?.includes(API_ROUTES.AUTH.LOGIN) || 
+            originalRequest.url?.includes(API_ROUTES.AUTH.REFRESH);
         if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
             originalRequest._retry = true;
 
             try {
-                const response = await axios.post('http://localhost:5098/api/auth/refresh', {
+                const response = await axios.post(`${API_BASE_URL}${API_ROUTES.AUTH.REFRESH}`, {
                     accessToken: localStorage.getItem('accessToken'),
                     refreshToken: localStorage.getItem('refreshToken')
                 });

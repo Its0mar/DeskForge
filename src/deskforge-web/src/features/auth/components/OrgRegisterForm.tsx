@@ -12,6 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from "@/components/ui/button";
 import { Loader2 } from 'lucide-react';
 
+import { API_ROUTES } from '@/lib/apiRoutes';
+
 
 const orgRegisterSchema = z.object({
     name: z.string().min(3, "Name must be at least 3 characters"),
@@ -57,7 +59,7 @@ export function OrgRegisterForm() {
         setGlobalError(null);
 
         try {
-            const response = await apiClient.post('/auth/organization/register', {
+            const response = await apiClient.post(`${API_ROUTES.AUTH.REGISTER_ORG}`, {
                 name: data.name,
                 userName: data.userName,
                 firstName: data.firstName,
@@ -67,7 +69,12 @@ export function OrgRegisterForm() {
                 password: data.password,
             });
 
-            login(response.data.user);
+            login(
+                response.data.user, 
+                response.data.accessToken, 
+                response.data.refreshToken,
+                response.data.expiresOnUtc
+            );
             
             window.location.href = "/dashboard";
         } catch (error : any) {

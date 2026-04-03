@@ -17,6 +17,8 @@ import {
 
 import { apiClient } from "@/lib/apiClient";
 import { useAuthStore } from "@/store/useAuthStore";
+import { API_ROUTES } from '@/lib/apiRoutes';
+
 
 const loginSchema = z.object({
     identifier: z.string().min(3, "Email or username is required"),
@@ -41,12 +43,17 @@ export function LoginForm() {
         setGlobalError(null);
 
         try {
-            const response = await apiClient.post('/auth/login', {
+            const response = await apiClient.post(`${API_ROUTES.AUTH.LOGIN}`, {
                 identifier: data.identifier,
                 password: data.password
             });
 
-            login(response.data.user);
+            login(
+                response.data.user, 
+                response.data.accessToken, 
+                response.data.refreshToken,
+                response.data.expiresOnUtc
+            );
 
             window.location.href = "/dashboard";
             

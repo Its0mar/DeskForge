@@ -67,7 +67,8 @@ public class TokenProvider(IConfiguration configuration, AppDbContext context, I
         await context.RefreshTokens.AddAsync(refreshResult.Value!, ct);
         await context.SaveChangesAsync(ct);
 
-        return new TokenResponse(accessToken, refreshResult.Value!.Token, expires);
+        var userDto = new UserDto(user.Id.ToString(), user.Email!, user.FirstName, user.LastName, user.Role.ToString());
+        return new TokenResponse(accessToken, refreshResult.Value!.Token, expires, userDto);
 
     }
 

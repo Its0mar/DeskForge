@@ -1,3 +1,4 @@
+using System.Text.Json;
 using DeskForge.Api.Infrastructure;
 using DeskForge.Api.Infrastructure.Auth;
 using DeskForge.Api.Infrastructure.Exceptions;
@@ -46,6 +47,11 @@ builder.Host.UseWolverine(opts =>
 builder.Services.AddWolverineHttp();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
+
+builder.Services.ConfigureHttpJsonOptions(opts =>
+{
+    opts.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+});
 
 // 2. The Build
 var app = builder.Build();

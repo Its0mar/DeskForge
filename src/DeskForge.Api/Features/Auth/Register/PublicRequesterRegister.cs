@@ -12,58 +12,56 @@ using Wolverine.Http;
 
 namespace DeskForge.Api.Features.Auth.Register;
 
-public sealed record RequesterRegisterCommand(
-    string Token,
+public sealed record PublicRequesterRegisterCommand(
     string UserName,
     string Email,
     string Password,
     string FirstName,
     string LastName);
 
-public sealed class RequesterRegisterCommandValidator
-    : AbstractValidator<RequesterRegisterCommand>
+public sealed class PublicRequesterRegisterCommandValidator
+    : AbstractValidator<PublicRequesterRegisterCommand>
 {
-    public RequesterRegisterCommandValidator()
+    public PublicRequesterRegisterCommandValidator()
     {
-        RuleFor(x => x.Token)
-            .NotEmpty().WithMessage("Registration token is required.");
-
-        RuleFor(x => x.UserName)
-            .NotEmpty().MinimumLength(3);
-
-        RuleFor(x => x.Email)
-            .NotEmpty().EmailAddress();
-
-        RuleFor(x => x.Password)
-            .NotEmpty().MinimumLength(6);
-
+        RuleFor(x => x.UserName).NotEmpty().MinimumLength(3);
+        RuleFor(x => x.Email).NotEmpty().EmailAddress();
+        RuleFor(x => x.Password).NotEmpty().MinimumLength(6);
         RuleFor(x => x.FirstName).NotEmpty();
         RuleFor(x => x.LastName).NotEmpty();
     }
 }
 
 [Tags("Auth")]
-public static class RequesterRegisterEndpoint
+public static class PublicRequesterRegisterEndpoint
 {
     public static async Task<ProblemDetails> ValidateAsync(
-        RequesterRegisterCommand command,
+        string orgSlug,
+        PublicRequesterRegisterCommand command,
         AppDbContext db,
         CancellationToken ct)
     {
-        var link = await db.RegistrationLinks
+        var org = await db.Organizations
             .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(l => l.Token == command.Token, ct);
+            .FirstOrDefaultAsync(o => o.TenantCode == orgSlug, ct);
 
-        if (link is null || !link.IsValid)
+        if (org is null)
             return new ProblemDetails
             {
-                Status = StatusCodes.Status400BadRequest,
-                Title  = "Invalid Token",
-                Detail = "Registration link is invalid or expired."
+                Status = StatusCodes.Status404NotFound,
+                Title  = "Not Found",
+                Detail = "Organization not found."
+            };
+
+        if (!org.IsPublicRegistrationOpen)
+            return new ProblemDetails
+            {
+                Status = StatusCodes.Status403Forbidden,
+                Title  = "Registration Closed",
+                Detail = "This organization is not accepting new registrations."
             };
 
         var emailExists = await db.Users
-            .IgnoreQueryFilters()
             .AnyAsync(u => u.Email == command.Email, ct);
 
         if (emailExists)
@@ -75,7 +73,6 @@ public static class RequesterRegisterEndpoint
             };
 
         var userNameExists = await db.Users
-            .IgnoreQueryFilters()
             .AnyAsync(u => u.UserName == command.UserName, ct);
 
         if (userNameExists)
@@ -89,18 +86,19 @@ public static class RequesterRegisterEndpoint
         return WolverineContinue.NoProblems;
     }
 
-    [WolverinePost("api/auth/register/requester")]
-    [EndpointSummary("RequesterRegisterViaLink")]
+    [WolverinePost("api/{orgSlug}/register")]
+    [EndpointSummary("Public Requester Registration")]
     public static async Task<Results<Ok<TokenResponse>, ProblemHttpResult>> Handle(
-        RequesterRegisterCommand command,
+        string orgSlug,
+        PublicRequesterRegisterCommand command,
         AppDbContext db,
         UserManager<AppUser> userManager,
         ITokenProvider tokenProvider,
         CancellationToken ct)
     {
-        var link = await db.RegistrationLinks
+        var org = await db.Organizations
             .IgnoreQueryFilters()
-            .FirstAsync(l => l.Token == command.Token, ct);
+            .FirstAsync(o => o.TenantCode == orgSlug, ct);
 
         var user = new AppUser
         {
@@ -108,7 +106,7 @@ public static class RequesterRegisterEndpoint
             Email          = command.Email,
             FirstName      = command.FirstName,
             LastName       = command.LastName,
-            OrganizationId = link.OrganizationId,
+            OrganizationId = org.Id,
             Role           = OrgRole.Requester
         };
 
@@ -118,9 +116,6 @@ public static class RequesterRegisterEndpoint
                 title:      "Registration Failed",
                 detail:     result.Errors.First().Description,
                 statusCode: StatusCodes.Status400BadRequest);
-
-        link.IncrementUsage();
-        await db.SaveChangesAsync(ct);
 
         var tokens = await tokenProvider.GenerateTokenAsync(user, ct);
         if (tokens.IsError)

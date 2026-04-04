@@ -28,7 +28,6 @@ public class AppDbContext(
     public DbSet<SlaPolicy> SlaPolicies => Set<SlaPolicy>();
     public DbSet<Ticket> Tickets => Set<Ticket>();
     public DbSet<TicketComment> TicketComments => Set<TicketComment>();
-    public DbSet<RegistrationLink>  RegistrationLinks => Set<RegistrationLink>();
     
     
     public Guid CurrentOrgId => GetGuidClaim("org_id");

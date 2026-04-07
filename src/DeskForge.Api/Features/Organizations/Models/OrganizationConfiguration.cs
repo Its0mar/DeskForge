@@ -20,9 +20,9 @@ public class OrganizationConfiguration : IEntityTypeConfiguration<Organization>,
 
     public void Configure(EntityTypeBuilder<OrgInvite> builder)
     {
-        builder.HasKey(e => e.OrganizationId);
+        builder.HasKey(e => e.Id);
        
-        builder.HasIndex(e => e.InviteToken).IsUnique();
+        builder.HasIndex(e => new {e.InviteToken, e.OrganizationId}).IsUnique();
         
         builder.Property(e => e.InviteToken).IsRequired().HasMaxLength(32);
         builder.Property(e => e.Email).IsRequired().HasMaxLength(256);
@@ -30,7 +30,7 @@ public class OrganizationConfiguration : IEntityTypeConfiguration<Organization>,
         builder.HasOne<Organization>()
             .WithMany()
             .HasForeignKey(e => e.OrganizationId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
         
         builder.HasOne<AppUser>()
             .WithOne()

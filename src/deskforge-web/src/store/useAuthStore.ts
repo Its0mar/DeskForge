@@ -3,10 +3,15 @@ import { create } from 'zustand';
 export interface UserInfo {
   id: string;
   email: string;
+  username: string;
   firstName: string;
   lastName: string;
   role: string;
+  orgId: string;
+  orgName : string;
+  tenantCode: string;
 }
+
 
 interface AuthState {
   user: UserInfo | null;
@@ -38,9 +43,9 @@ export const useAuthStore = create<AuthState>((set) => ({
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('tokenExpiresOnUtc');
     localStorage.removeItem('userInfo');
-    
+
     set({ user: null, isAuthenticated: false });
-    
-    window.location.href = '/login'; 
+
+    window.location.href = '/login';
   },
-}));
+}));

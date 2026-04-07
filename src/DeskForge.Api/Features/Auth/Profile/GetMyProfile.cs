@@ -8,21 +8,13 @@ using Wolverine.Http;
 
 namespace DeskForge.Api.Features.Auth.Profile;
 
-public sealed record GetEmployeeProfileResponse(
-    Guid Id,
-    string FirstName,
-    string LastName,
-    string Email,
-    string Role,
-    Guid OrganizationId);
-
 [Tags("Auth")]
 public static class GetProfileEndpoint
 {
     [Authorize]
-    [WolverineGet("api/auth/profile")]
+    [WolverineGet("api/a")]
     [EndpointSummary("GetMyProfile")]
-    public static async Task<Results<Ok<GetEmployeeProfileResponse>, NotFound>> Handle(
+    public static async Task<Results<Ok<GetMyProfileResponse>, NotFound>> Handle(
         UserContext currentUser,
         AppDbContext db,
         CancellationToken ct)
@@ -32,13 +24,15 @@ public static class GetProfileEndpoint
             .AsNoTracking()
             .IgnoreQueryFilters()
             .Where(u => u.Id == currentUser.UserId)
-            .Select(u => new GetEmployeeProfileResponse(
-                u.Id,
+            .Select(u => new GetMyProfileResponse(
+                u.Id.ToString(),
+                u.UserName!,
+                u.Email!,
                 u.FirstName,
                 u.LastName,
-                u.Email!,
                 u.Role.ToString(),
-                u.OrganizationId))
+                u.OrganizationId.ToString(),
+                u.Organization.Name ))
             .FirstOrDefaultAsync(ct);
 
         return user is not null
@@ -46,3 +40,14 @@ public static class GetProfileEndpoint
             : TypedResults.NotFound();
     }
 }
+
+public sealed record GetMyProfileResponse(
+    string Id, 
+    string UserName, 
+    string Email, 
+    string FirstName, 
+    string LastName, 
+    string Role, 
+    string OrgId,
+    string OrgName
+);

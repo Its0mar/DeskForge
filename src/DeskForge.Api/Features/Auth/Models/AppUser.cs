@@ -21,4 +21,6 @@ public class AppUser : IdentityUser<Guid>, IAuditableEntity
 
     public bool IsDeleted { get; set; } = false;
     public bool IsActive { get; set; } = true;
+
+    public Organization Organization { get; set; } = null!;
 }

@@ -5,6 +5,10 @@ import { PublicRoute } from "./components/PublicRoute";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import RequesterRegisterPage from "./features/auth/pages/RequesterRegisterPage";
 import AcceptInvitePage from "./features/auth/pages/AcceptInvitePage";
+import ProfilePage from "./features/auth/pages/ProfilePage";
+import OrganizationSettingsPage from "./features/Organizations/pages/OrganizationSettingsPage";
+import MembersPage from "./features/Organizations/pages/MembersPage";
+import RequestersPage from "./features/Organizations/pages/RequestersPage";
 
 function App() {
   return (
@@ -20,6 +24,10 @@ function App() {
 
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<div>Dashboard (coming soon)</div>} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/organization" element={<OrganizationSettingsPage />} />
+          <Route path="/members" element={<MembersPage />} />
+          <Route path="/clients" element={<RequestersPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" replace />} />

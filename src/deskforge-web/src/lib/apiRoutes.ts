@@ -16,5 +16,9 @@ export const API_ROUTES = {
         MEMBER_ROLE: (userId: string) => `/organizations/members/${userId}/role`,
         MEMBER_REMOVE: (userId: string) => `/organizations/members/${userId}`,
         INVITE : `/organizations/invite-employee`,
+    },
+    TEAMS: {
+        BASE: '/organizations/teams',
+        ADD_MEMBER: '/organizations/teams/members',
     }
 } as const

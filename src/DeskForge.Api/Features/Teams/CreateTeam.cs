@@ -48,7 +48,7 @@ public static class CreateTeamEndpoint
     }
 
     [Authorize(Policy = "OwnerOrManager")]
-    [WolverinePost("api/teams")]
+    [WolverinePost("api/organizations/teams")]
     [EndpointSummary("CreateTeam")]
     public static async Task<Results<Ok<Guid>, ProblemHttpResult>> Handle(CreateTeamCommand command, UserContext currentUser,  AppDbContext db, CancellationToken ct)
     {

@@ -10,7 +10,7 @@ public class AppUser : IdentityUser<Guid>, IAuditableEntity
     public string FirstName { get; set; } 
     public string LastName { get; set; } 
 
-    public OrgRole Role { get; init; }
+    public OrgRole Role { get; set; }
     public bool IsOwner => Role == OrgRole.Owner;
     public Guid OrganizationId { get; set; }
     public DateTimeOffset CreatedAtUtc { get; set; }
@@ -23,4 +23,17 @@ public class AppUser : IdentityUser<Guid>, IAuditableEntity
     public bool IsActive { get; set; } = true;
 
     public Organization Organization { get; set; } = null!;
+
+    public void Delete()
+    {
+        IsDeleted = true;
+        IsActive = false;
+    }
+
+    public void UpdateRole(OrgRole role)
+    {
+        if (Role == OrgRole.Owner || Role == OrgRole.Requester) return;
+
+        Role = role;
+    }
 }

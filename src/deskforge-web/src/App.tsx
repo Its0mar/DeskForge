@@ -9,6 +9,7 @@ import ProfilePage from "./features/auth/pages/ProfilePage";
 import OrganizationSettingsPage from "./features/Organizations/pages/OrganizationSettingsPage";
 import MembersPage from "./features/Organizations/pages/MembersPage";
 import RequestersPage from "./features/Organizations/pages/RequestersPage";
+import TeamsPage from "./features/teams/pages/TeamsPage";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path="/organization" element={<OrganizationSettingsPage />} />
           <Route path="/members" element={<MembersPage />} />
           <Route path="/clients" element={<RequestersPage />} />
+          <Route path="/teams" element={<TeamsPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" replace />} />

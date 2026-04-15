@@ -60,7 +60,7 @@ public static class AddTeamMember
     }
     
     [Authorize(Policy = "OwnerOrManager")]
-    [WolverinePost("api/teams/members")]
+    [WolverinePost("api/organizations/teams/members")]
     [EndpointSummary("AddTeamMember")]
     public static async Task<Results<Ok<Guid>, ProblemHttpResult>> Handle(
         AddTeamMemberCommand command,

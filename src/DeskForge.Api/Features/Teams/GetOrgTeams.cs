@@ -10,7 +10,7 @@ namespace DeskForge.Api.Features.Teams;
 public static class GetOrgTeamsEndpoint
 {
     [Authorize(Policy = "OwnerOrManager")]
-    [WolverineGet("api/teams")]
+    [WolverineGet("api/organizations/teams")]
     [EndpointSummary("GetOrgTeams")]
     public static async Task<Ok<IReadOnlyList<GetOrgTeamsResponse>>> Handle(AppDbContext db, CancellationToken ct)
     {

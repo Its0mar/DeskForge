@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Wolverine.Http;
 
-namespace DeskForge.Api.Features.Auth.Login;
+namespace DeskForge.Api.Features.Auth;
 
 [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
 public sealed record LoginCommand(string Identifier, string Password);
@@ -37,6 +37,7 @@ public static class LoginEndpoint
         CancellationToken ct)
     {
         var user = await userManager.Users
+            .Include(u => u.Organization)
             .IgnoreQueryFilters()
             .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Email == command.Identifier || u.UserName == command.Identifier, ct);

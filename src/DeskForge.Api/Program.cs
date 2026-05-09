@@ -53,6 +53,10 @@ builder.Services.ConfigureHttpJsonOptions(opts =>
     opts.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 });
 
+builder.Services.AddOutputCache(options => {
+    options.AddBasePolicy(policyBuilder => policyBuilder.Expire(TimeSpan.FromMinutes(5)));
+});
+
 // 2. The Build
 var app = builder.Build();
 
@@ -80,5 +84,7 @@ app.MapWolverineEndpoints(opts =>
     opts.UseFluentValidationProblemDetailMiddleware();
     opts.AddMiddleware(typeof(ClaimsPrincipalParserMiddleware));
 });
+
+app.UseOutputCache();
 
 app.Run();

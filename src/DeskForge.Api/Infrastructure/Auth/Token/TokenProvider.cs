@@ -74,8 +74,9 @@ public class TokenProvider(IConfiguration configuration, AppDbContext context, I
             user.FirstName,
             user.LastName,
             user.Role.ToString(),
-            user.Organization?.TenantCode ?? "N/A",
-            user.Organization?.OrganizationId.ToString() ?? "0"
+            user.Organization.TenantCode ?? "N/A",
+            user.OrganizationId.ToString(),
+            user.Organization.Name
         );
         return new TokenResponse(accessToken, refreshResult.Value!.Token, expires, userDto);
 

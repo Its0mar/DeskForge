@@ -6,13 +6,13 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Wolverine.Http;
 
-namespace DeskForge.Api.Features.Auth.Profile;
+namespace DeskForge.Api.Features.Auth;
 
 [Tags("Auth")]
 public static class GetProfileEndpoint
 {
     [Authorize]
-    [WolverineGet("api/a")]
+    [WolverineGet("api/auth/profile")]
     [EndpointSummary("GetMyProfile")]
     public static async Task<Results<Ok<GetMyProfileResponse>, NotFound>> Handle(
         UserContext currentUser,

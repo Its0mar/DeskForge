@@ -8,5 +8,6 @@ public record UserDto(
     string LastName,
     string Role,
     string TenantCode,
-    string OrgId
+    string OrgId,
+    string OrgName
 );

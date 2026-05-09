@@ -10,6 +10,8 @@ import OrganizationSettingsPage from "./features/Organizations/pages/Organizatio
 import MembersPage from "./features/Organizations/pages/MembersPage";
 import RequestersPage from "./features/Organizations/pages/RequestersPage";
 import TeamsPage from "./features/teams/pages/TeamsPage";
+import CreateCategoryPage from "./features/Categories/pages/CreateCategoryPage";
+import CategoriesPage from "./features/Categories/pages/CategoriesPage";
 
 function App() {
   return (
@@ -30,6 +32,8 @@ function App() {
           <Route path="/members" element={<MembersPage />} />
           <Route path="/clients" element={<RequestersPage />} />
           <Route path="/teams" element={<TeamsPage />} />
+          <Route path="/category" element={<CategoriesPage/>}/>
+          <Route path="/category/new" element={<CreateCategoryPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" replace />} />

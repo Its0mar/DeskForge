@@ -102,7 +102,7 @@ export default function ProfilePage() {
                 <CardContent className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
                         <Label className="text-muted-foreground">Workspace / Tenant Code</Label>
-                        <p className="font-medium text-lg">{user.tenantCode}</p>
+                        <p className="font-medium text-lg">{user.orgName}</p>
                     </div>
                     <div className="space-y-1">
                         <Label className="text-muted-foreground">Your Role</Label>

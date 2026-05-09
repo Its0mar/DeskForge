@@ -23,7 +23,7 @@ public sealed class RefreshTokenCommandValidator : AbstractValidator<RefreshToke
 }
 
 [Tags("Auth")]
-public static class RefreshTokenEndpoint
+public static class RefreshToken
 {
     [WolverinePost("api/auth/refresh")]
     [EndpointSummary("Refresh access token")]

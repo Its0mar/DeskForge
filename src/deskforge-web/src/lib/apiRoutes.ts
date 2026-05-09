@@ -20,5 +20,9 @@ export const API_ROUTES = {
     TEAMS: {
         BASE: '/organizations/teams',
         ADD_MEMBER: '/organizations/teams/members',
+    },
+    CATEGORIES: {
+        BASE: (page: number, size: number = 10) => `/categories?page=${page}&size=${size}`,
+        CREATE: '/categories',
     }
 } as const

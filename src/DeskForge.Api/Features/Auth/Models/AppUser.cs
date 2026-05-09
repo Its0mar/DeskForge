@@ -32,7 +32,7 @@ public class AppUser : IdentityUser<Guid>, IAuditableEntity
 
     public void UpdateRole(OrgRole role)
     {
-        if (Role == OrgRole.Owner || Role == OrgRole.Requester) return;
+        if (Role is OrgRole.Owner or OrgRole.Requester) return;
 
         Role = role;
     }

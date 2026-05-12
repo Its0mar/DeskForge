@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace DeskForge.Api.Features.Organizations.Models;
 
-public class OrganizationConfiguration : IEntityTypeConfiguration<Organization>, IEntityTypeConfiguration<OrgInvite>
+public class OrganizationConfiguration : IEntityTypeConfiguration<Organization>
 {
     public void Configure(EntityTypeBuilder<Organization> builder)
     {
@@ -17,24 +17,5 @@ public class OrganizationConfiguration : IEntityTypeConfiguration<Organization>,
         
         builder.Property(e => e.Name).HasMaxLength(100).IsRequired();
     }
-
-    public void Configure(EntityTypeBuilder<OrgInvite> builder)
-    {
-        builder.HasKey(e => e.Id);
-       
-        builder.HasIndex(e => new {e.InviteToken, e.OrganizationId}).IsUnique();
-        
-        builder.Property(e => e.InviteToken).IsRequired().HasMaxLength(32);
-        builder.Property(e => e.Email).IsRequired().HasMaxLength(256);
-        
-        builder.HasOne<Organization>()
-            .WithMany()
-            .HasForeignKey(e => e.OrganizationId)
-            .OnDelete(DeleteBehavior.Restrict);
-        
-        builder.HasOne<AppUser>()
-            .WithOne()
-            .HasForeignKey<OrgInvite>(e => e.CreatedUserId)
-            .OnDelete(DeleteBehavior.SetNull);
-    }
+    
 }

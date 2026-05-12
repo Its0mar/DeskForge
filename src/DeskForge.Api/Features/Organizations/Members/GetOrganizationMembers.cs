@@ -52,8 +52,8 @@ public static class GetOrganizationMembersEndpoint
         var totalCount = await query.CountAsync(ct);
 
         var members = await query
-            .OrderBy(u => u.Role) // Group by role first
-            .ThenBy(u => u.LastName) // Alphabetical sorting is mandatory before pagination!
+            .OrderBy(u => u.Role)
+            .ThenBy(u => u.LastName) 
             .ThenBy(u => u.FirstName)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)

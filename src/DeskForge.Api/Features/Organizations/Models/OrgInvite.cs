@@ -1,5 +1,6 @@
 using DeskForge.Api.Common.Entities;
 using DeskForge.Api.Common.Enums;
+using DeskForge.Api.Features.Auth.Models;
 
 namespace DeskForge.Api.Features.Organizations.Models;
 
@@ -12,7 +13,13 @@ public class OrgInvite : AuditableEntity
     public Guid? CreatedUserId { get; private set; } 
     public bool IsRevoked { get; private set; } =  false;
     public bool IsAccepted => CreatedUserId.HasValue;
-    public bool IsValid => !IsRevoked && !IsAccepted && DateTimeOffset.UtcNow < ExpiresAtUtc;
+    public bool IsValid => IsActive 
+                           && !IsRevoked 
+                           && !IsAccepted 
+                           && DateTimeOffset.UtcNow < ExpiresAtUtc;
+
+    // Navigation: the user who sent this invite (used in GetInvites response)
+    public AppUser? CreatedBy { get; set; }
     
     private OrgInvite()
     { }
@@ -31,11 +38,15 @@ public class OrgInvite : AuditableEntity
     
     public void Accept(Guid createdUserId)
     {
-        if (IsValid)
-        {
-            CreatedUserId = createdUserId;
-        }
+        if (!IsValid) return;
+        
+        CreatedUserId = createdUserId;
+        IsActive = false;
     }
     
-    public void Revoke() => IsRevoked = true;
+    public void Revoke()
+    {
+        IsRevoked = true;
+        IsActive = false;
+    }
 }

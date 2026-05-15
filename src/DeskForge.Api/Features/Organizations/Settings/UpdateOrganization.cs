@@ -1,3 +1,4 @@
+using DeskForge.Api.Features.Organizations.Settings;
 using DeskForge.Api.Infrastructure.Auth.Models;
 using DeskForge.Api.Infrastructure.Persistence;
 using FluentValidation;
@@ -23,7 +24,7 @@ public static class UpdateOrganizationEndpoint
 {
     [Authorize(Policy = "OwnerOrManager")]
     [WolverinePut("api/organizations")]
-    public static async Task<Ok<GetOrganizationQueryResponse>> Handle(
+    public static async Task<Results<Ok<GetOrganizationQueryResponse>, NotFound>> Handle(
         UpdateOrganizationCommand command, 
         AppDbContext db, 
         UserContext currentUser, 
@@ -31,8 +32,12 @@ public static class UpdateOrganizationEndpoint
     {
         var organization = await db.Organizations
             .FirstOrDefaultAsync(o => o.Id == currentUser.OrganizationId, ct);
-
-        organization!.Update(command.Name);
+        
+        if (organization is null)
+        {
+            return TypedResults.NotFound();
+        }
+        organization.Update(command.Name);
         await db.SaveChangesAsync(ct);
         
         var orgResponse = new GetOrganizationQueryResponse(

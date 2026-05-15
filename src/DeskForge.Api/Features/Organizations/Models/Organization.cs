@@ -21,5 +21,10 @@ public class Organization : AuditableEntity
     {
         Name = name;
     }
-    
+
+    public void CloseAccount()
+    {
+        IsActive = false;
+        IsDeleted = true;
+    }
 }

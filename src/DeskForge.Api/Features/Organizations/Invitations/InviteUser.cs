@@ -57,7 +57,7 @@ public class SendInviteEndpoint
     }
     
     [Authorize(Roles = "Owner, Manager")]
-    [WolverinePost("api/organizations/invite-employee")]
+    [WolverinePost("api/organizations/invites")]
     public async Task<Results<Ok<string>, ProblemHttpResult>> Handle(SendInviteCommand command, UserContext currentUser, AppDbContext db,
         CancellationToken ct)
     {

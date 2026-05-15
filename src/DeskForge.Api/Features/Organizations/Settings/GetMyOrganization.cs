@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Wolverine.Http;
 
-namespace DeskForge.Api.Features.Organizations;
+namespace DeskForge.Api.Features.Organizations.Settings;
 
 
 

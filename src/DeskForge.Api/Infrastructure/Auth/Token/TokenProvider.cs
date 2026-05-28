@@ -67,6 +67,13 @@ public class TokenProvider(IConfiguration configuration, AppDbContext context, I
         await context.RefreshTokens.AddAsync(refreshResult.Value!, ct);
         await context.SaveChangesAsync(ct);
         
+        // user.Organization may be null when called with a freshly-created AppUser
+        var org = user.Organization
+                  ?? await context.Organizations
+                      .IgnoreQueryFilters()
+                      .AsNoTracking()
+                      .FirstOrDefaultAsync(o => o.Id == user.OrganizationId, ct);
+
         var userDto = new UserDto(
             user.Id.ToString(),
             user.UserName ?? "Unknown",
@@ -74,9 +81,9 @@ public class TokenProvider(IConfiguration configuration, AppDbContext context, I
             user.FirstName,
             user.LastName,
             user.Role.ToString(),
-            user.Organization.TenantCode ?? "N/A",
+            org?.TenantCode ?? "N/A",
             user.OrganizationId.ToString(),
-            user.Organization.Name
+            org?.Name ?? "Unknown"
         );
         return new TokenResponse(accessToken, refreshResult.Value!.Token, expires, userDto);
 

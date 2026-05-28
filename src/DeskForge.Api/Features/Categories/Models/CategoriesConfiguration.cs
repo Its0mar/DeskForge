@@ -12,7 +12,7 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.HasOne(e => e.TargetTeam)
             .WithMany()
             .HasForeignKey(e => e.TargetTeamId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.NoAction);
         
         builder.Property(e => e.Name).IsRequired().HasMaxLength(30);
         builder.Property(e => e.Description).HasMaxLength(300);

@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using DeskForge.Api.Common.Enums;
 using DeskForge.Api.Features.Tickets.Models;
 using DeskForge.Api.Infrastructure.Auth.Models;
@@ -32,59 +31,40 @@ public sealed class AddCommentRequestValidator
 [Tags("comments")]
 public static class AddTicketCommentEndpoint
 {
-    public static async Task<ProblemDetails> ValidateAsync(
-        AddTicketCommentCommand command,
+    [Authorize]
+    [WolverinePost("api/tickets/{ticketId}/comments")]
+    public static async Task<Results<Ok<Guid>, NotFound, ForbidHttpResult, BadRequest<string>>> Handle(
+        [FromRoute] Guid ticketId,
+        AddCommentRequest request,
         AppDbContext db,
         UserContext currentUser,
         CancellationToken ct)
     {
         var ticket = await db.Tickets
-            .FirstOrDefaultAsync(t => t.Id == command.TicketId, ct);
+            .FirstOrDefaultAsync(t => t.Id == ticketId, ct);
 
         if (ticket is null)
-            return new ProblemDetails
-            {
-                Status = StatusCodes.Status404NotFound,
-                Title  = "Not Found",
-                Detail = "Ticket not found."
-            };
+            return TypedResults.NotFound();
 
+        // closed ticket rule
         if (ticket.Status == TicketStatus.Closed)
-            return new ProblemDetails
-            {
-                Status = StatusCodes.Status400BadRequest,
-                Title  = "Ticket Closed",
-                Detail = "Cannot add comments to a closed ticket."
-            };
+            return TypedResults.BadRequest("Cannot add comments to a closed ticket.");
 
-        if (currentUser.Role == OrgRole.Requester && command.Request.IsInternal)
-            return new ProblemDetails
-            {
-                Status = StatusCodes.Status403Forbidden,
-                Title  = "Forbidden",
-                Detail = "Requesters cannot add internal notes."
-            };
+        // internal comment rule
+        if (request.IsInternal && currentUser.Role == OrgRole.Requester)
+            return TypedResults.Forbid();
 
-        return WolverineContinue.NoProblems;
-    }
+        var comment = TicketComment.Create(
+            request.Content,
+            request.IsInternal,
+            ticketId,
+            currentUser.UserId);
 
-    [Authorize]
-    [WolverinePost("api/tickets/{ticketId}/comments")]
-    [EndpointSummary("AddComment")]
-    public static async Task<Ok<Guid>> Handle(
-        AddTicketCommentCommand command,
-        AppDbContext db,
-        UserContext currentUser,
-        CancellationToken ct)
-    {
-        var comment = TicketComment.Create(command.Request.Content, command.Request.IsInternal, command.TicketId, currentUser.UserId);
-        
         db.TicketComments.Add(comment);
-        await db.Tickets.Where(t => t.Id == command.TicketId)
-            .ExecuteUpdateAsync(s => s.SetProperty(t => t.LastActivityAt, DateTimeOffset.UtcNow), ct);
-       
+        ticket.UpdateLastActivity();
+
         await db.SaveChangesAsync(ct);
-        
+
         return TypedResults.Ok(comment.Id);
     }
     

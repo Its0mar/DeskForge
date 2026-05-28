@@ -1,4 +1,3 @@
-using DeskForge.Api.Features.Auth.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -20,10 +19,10 @@ public class OrgInviteConfiguration : IEntityTypeConfiguration<OrgInvite>
             .HasForeignKey(e => e.OrganizationId)
             .OnDelete(DeleteBehavior.Restrict);
         
-        builder.HasOne<AppUser>()
-            .WithMany()
-            .HasForeignKey(e => e.CreatedUserId)
-            .OnDelete(DeleteBehavior.SetNull);
+        // builder.HasOne<AppUser>()
+        //     .WithMany()
+        //     .HasForeignKey(e => e.CreatedUserId)
+        //     .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasOne(o => o.CreatedBy)
             .WithMany()

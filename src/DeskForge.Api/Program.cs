@@ -1,4 +1,5 @@
 using System.Text.Json;
+using DeskForge.Api.Features.Tickets;
 using DeskForge.Api.Infrastructure;
 using DeskForge.Api.Infrastructure.Auth;
 using DeskForge.Api.Infrastructure.Exceptions;
@@ -56,7 +57,7 @@ builder.Services.ConfigureHttpJsonOptions(opts =>
 builder.Services.AddOutputCache(options => {
     options.AddBasePolicy(policyBuilder => policyBuilder.Expire(TimeSpan.FromMinutes(5)));
 });
-
+builder.Services.AddScoped<TicketAssignmentEngine>();
 // 2. The Build
 var app = builder.Build();
 

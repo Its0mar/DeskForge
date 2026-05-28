@@ -30,7 +30,7 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
         builder.HasOne<AppUser>()
             .WithMany()
             .HasForeignKey(x => x.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
         
     }
 }

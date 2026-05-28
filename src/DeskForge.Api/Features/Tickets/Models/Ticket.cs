@@ -1,6 +1,7 @@
 using DeskForge.Api.Common.Entities;
 using DeskForge.Api.Common.Enums;
 using DeskForge.Api.Common.Results;
+using DeskForge.Api.Features.Categories.Models;
 
 namespace DeskForge.Api.Features.Tickets.Models;
 
@@ -16,13 +17,15 @@ public class Ticket : AuditableEntity
     // SLA
     public DateTime? ResponseDeadline { get; private set; }
     public DateTime? ResolutionDeadline { get; private set; }
-    public DateTime? FirstRespondedAt { get; private set; }
+    public DateTime? FirstResponseAt { get; private set; }
     public DateTime? ClosedAt { get; private set; }
     public DateTime LastActivityAt { get; private set; }
 
     public Guid SubmittedByUserId { get; private set; }
     public string SubmitterName { get; private set; } = string.Empty;
     public string SubmitterEmail { get; private set; } = string.Empty;
+    
+    public Category Category { get; set; }
     
     private Ticket() { } // EF constructor
 
@@ -78,7 +81,7 @@ public class Ticket : AuditableEntity
 
     public void MarkFirstResponse()
     {
-        FirstRespondedAt ??= DateTime.UtcNow;
+        FirstResponseAt ??= DateTime.UtcNow;
         LastActivityAt = DateTime.UtcNow;
     }
     
@@ -117,6 +120,11 @@ public class Ticket : AuditableEntity
         Status         = TicketStatus.InProgress;
         LastActivityAt = DateTime.UtcNow;
         return Result.Updated;
+    }
+
+    public void UpdateLastActivity()
+    {
+        LastActivityAt = DateTime.UtcNow;
     }
 
 }

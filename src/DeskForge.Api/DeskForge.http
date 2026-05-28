@@ -1,0 +1,318 @@
+### ============================================================
+###  DeskForge API — End-to-End Test Flow
+###  Order: Register Org → Login → Setup → Invite → Employees
+###         → Team → Category → SLA → Ticket
+### ============================================================
+
+@baseUrl = http://localhost:5098
+
+### ─────────────────────────────────────────────
+###  [1] REGISTER ORGANIZATION (Owner account)
+### ─────────────────────────────────────────────
+# @name registerOrg
+POST {{baseUrl}}/api/auth/organization/register
+Content-Type: application/json
+
+{
+  "name": "Acme Corp",
+  "userName": "acme-owner",
+  "firstName": "Alice",
+  "lastName": "Smith",
+  "tenantCode": "acme-corp",
+  "email": "alice@acme.com",
+  "password": "Password123!"
+}
+
+### — Capture owner tokens
+#@ownerAccessToken  = {{registerOrg.response.body.accessToken}}
+@ownerAccessToken  = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNTRiOTA2OS1mZDU4LTRmNzYtMDQ5NS0wOGRlYmNiNWM3MDgiLCJlbWFpbCI6Im9yZ0BnbWFpbC5jb20iLCJqdGkiOiJmOGEzNDE3NS0xZTQ1LTQwZTYtOGNhYS1iYWNjMDY3NzNkZGMiLCJyb2xlIjoiT3duZXIiLCJvcmdfcm9sZSI6Ik93bmVyIiwib3JnX2lkIjoiOGRmNDA5ODUtZDQzYS00ZGU1LWJlZTgtN2JkYzI0ODQzMTRjIiwibmFtZSI6Im9yZyBudW0xIiwibmJmIjoxNzc5OTcyMDI5LCJleHAiOjE3Nzk5NzU2MjksImlhdCI6MTc3OTk3MjAyOSwiaXNzIjoiRGVza0ZvcmdlQXBpIiwiYXVkIjoiRGVza0ZvcmdlQ2xpZW50In0.O8ab6RL98smzpe8-vOC0D-m1XT4TphRY2gYM-g67cuA
+@ownerRefreshToken = {{registerOrg.response.body.refreshToken}}
+
+
+### ─────────────────────────────────────────────
+###  [2] LOGIN (Owner — alternative to register)
+### ─────────────────────────────────────────────
+# @name loginOwner
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "identifier": "alice@acme.com",
+  "password": "Password123!"
+}
+
+### — Uncomment this block and comment out the register variables above
+###   if you already have an account and want to log in instead.
+# @ownerAccessToken  = {{loginOwner.response.body.accessToken}}
+# @ownerRefreshToken = {{loginOwner.response.body.refreshToken}}
+
+
+### ─────────────────────────────────────────────
+###  [3] CREATE SLA POLICIES (required before tickets)
+### ─────────────────────────────────────────────
+
+### SLA — Urgent
+# @name slaUrgent
+POST {{baseUrl}}/api/sla
+Content-Type: application/json
+Authorization: Bearer {{ownerAccessToken}}
+
+{
+  "priority": 0,
+  "responseMinutes": 60,
+  "resolutionMinutes": 240
+}
+
+### SLA — High
+# @name slaHigh
+POST {{baseUrl}}/api/sla
+Content-Type: application/json
+Authorization: Bearer {{ownerAccessToken}}
+
+{
+  "priority": 1,
+  "responseMinutes": 240,
+  "resolutionMinutes": 480
+}
+
+### SLA — Medium
+# @name slaMedium
+POST {{baseUrl}}/api/sla
+Content-Type: application/json
+Authorization: Bearer {{ownerAccessToken}}
+
+{
+  "priority": 2,
+  "responseMinutes": 480,
+  "resolutionMinutes": 1440
+}
+
+### SLA — Low
+# @name slaLow
+POST {{baseUrl}}/api/sla
+Content-Type: application/json
+Authorization: Bearer {{ownerAccessToken}}
+
+{
+  "priority": 3,
+  "responseMinutes": 1440,
+  "resolutionMinutes": 4320
+}
+
+
+### ─────────────────────────────────────────────
+###  [4] INVITE EMPLOYEE 1 (Staff)
+### ─────────────────────────────────────────────
+# @name inviteEmployee1
+POST {{baseUrl}}/api/organizations/invites
+Content-Type: application/json
+Authorization: Bearer {{ownerAccessToken}}
+
+{
+  "email": "bob@acme.com",
+  "role": 2
+}
+
+@inviteToken1 = {{inviteEmployee1.response.body}}
+
+
+### ─────────────────────────────────────────────
+###  [5] INVITE EMPLOYEE 2 (Manager)
+### ─────────────────────────────────────────────
+# @name inviteEmployee2
+POST {{baseUrl}}/api/organizations/invites
+Content-Type: application/json
+Authorization: Bearer {{ownerAccessToken}}
+
+{
+  "email": "carol@acme.com",
+  "role": 1
+}
+
+@inviteToken2 = {{inviteEmployee2.response.body}}
+
+
+### ─────────────────────────────────────────────
+###  [6] EMPLOYEE 1 ACCEPTS INVITE (Bob — Staff)
+### ─────────────────────────────────────────────
+# @name acceptInvite1
+POST {{baseUrl}}/api/auth/invites/accept
+Content-Type: application/json
+
+{
+  "token": "{{inviteToken1}}",
+  "userName": "bob-staff",
+  "firstName": "Bob",
+  "lastName": "Jones",
+  "password": "Password123!"
+}
+
+@emp1AccessToken  = {{acceptInvite1.response.body.accessToken}}
+@emp1RefreshToken = {{acceptInvite1.response.body.refreshToken}}
+
+
+### ─────────────────────────────────────────────
+###  [7] EMPLOYEE 2 ACCEPTS INVITE (Carol — Manager)
+### ─────────────────────────────────────────────
+# @name acceptInvite2
+POST {{baseUrl}}/api/auth/invites/accept
+Content-Type: application/json
+
+{
+  "token": "{{inviteToken2}}",
+  "userName": "carol-mgr",
+  "firstName": "Carol",
+  "lastName": "White",
+  "password": "Password123!"
+}
+
+@emp2AccessToken  = {{acceptInvite2.response.body.accessToken}}
+@emp2RefreshToken = {{acceptInvite2.response.body.refreshToken}}
+
+
+### ─────────────────────────────────────────────
+###  [8] GET ORGANIZATION MEMBERS (verify all 3 members)
+### ─────────────────────────────────────────────
+GET {{baseUrl}}/api/organizations/members
+Authorization: Bearer {{ownerAccessToken}}
+
+
+### ─────────────────────────────────────────────
+###  [9] CREATE TEAM
+### ─────────────────────────────────────────────
+# @name createTeam
+POST {{baseUrl}}/api/organizations/teams
+Content-Type: application/json
+Authorization: Bearer {{ownerAccessToken}}
+
+{
+  "name": "Support Team",
+  "description": "Handles all customer support tickets"
+}
+
+@teamId = {{createTeam.response.body}}
+
+
+### ─────────────────────────────────────────────
+###  [10] ADD EMPLOYEE 1 (Bob) TO TEAM
+###  NOTE: Replace <bob-user-id> with the actual Guid
+###        returned in the /members response above.
+### ─────────────────────────────────────────────
+# @name addMember1
+POST {{baseUrl}}/api/organizations/teams/members
+Content-Type: application/json
+Authorization: Bearer {{ownerAccessToken}}
+
+{
+  "userId": "<bob-user-id>",
+  "teamId": "{{teamId}}"
+}
+
+
+### ─────────────────────────────────────────────
+###  [11] ADD EMPLOYEE 2 (Carol) TO TEAM
+###  NOTE: Replace <carol-user-id> with the actual Guid.
+### ─────────────────────────────────────────────
+# @name addMember2
+POST {{baseUrl}}/api/organizations/teams/members
+Content-Type: application/json
+Authorization: Bearer {{ownerAccessToken}}
+
+{
+  "userId": "<carol-user-id>",
+  "teamId": "{{teamId}}"
+}
+
+
+### ─────────────────────────────────────────────
+###  [12] GET TEAMS (verify)
+### ─────────────────────────────────────────────
+GET {{baseUrl}}/api/organizations/teams
+Authorization: Bearer {{ownerAccessToken}}
+
+
+### ─────────────────────────────────────────────
+###  [13] CREATE CATEGORY (linked to the team)
+### ─────────────────────────────────────────────
+# @name createCategory
+POST {{baseUrl}}/api/categories
+Content-Type: application/json
+Authorization: Bearer {{ownerAccessToken}}
+
+{
+  "name": "Hardware Issues",
+  "description": "Issues related to physical hardware and devices",
+  "targetTeamId": "{{teamId}}"
+}
+
+@categoryId = {{createCategory.response.body}}
+
+
+### ─────────────────────────────────────────────
+###  [14] GET CATEGORIES (verify)
+### ─────────────────────────────────────────────
+GET {{baseUrl}}/api/categories
+Authorization: Bearer {{ownerAccessToken}}
+
+
+### ─────────────────────────────────────────────
+###  [15] CREATE TICKET (submitted by Employee 1)
+###  Priority: 0=Urgent, 1=High, 2=Medium, 3=Low
+### ─────────────────────────────────────────────
+# @name createTicket
+POST {{baseUrl}}/api/tickets
+Content-Type: application/json
+Authorization: Bearer {{emp1AccessToken}}
+
+{
+  "title": "Laptop won't turn on",
+  "description": "My work laptop stopped turning on after the latest Windows update was applied yesterday afternoon.",
+  "priority": 2,
+  "categoryId": "{{categoryId}}"
+}
+
+@ticketId = {{createTicket.response.body}}
+
+
+### ─────────────────────────────────────────────
+###  [16] GET TICKET (verify creation + SLA applied)
+### ─────────────────────────────────────────────
+GET {{baseUrl}}/api/tickets/{{ticketId}}
+Authorization: Bearer {{ownerAccessToken}}
+
+
+### ─────────────────────────────────────────────
+###  [17] REFRESH TOKEN (Owner — demonstrate flow)
+### ─────────────────────────────────────────────
+# @name refreshOwner
+POST {{baseUrl}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "accessToken": "{{ownerAccessToken}}",
+  "refreshToken": "{{ownerRefreshToken}}"
+}
+
+### — Update owner token after refresh
+# @ownerAccessToken = {{refreshOwner.response.body.accessToken}}
+
+
+### ─────────────────────────────────────────────
+###  [18] GET MY PROFILE
+### ─────────────────────────────────────────────
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{ownerAccessToken}}
+
+
+### ─────────────────────────────────────────────
+###  [19] GET MY ORGANIZATION
+### ─────────────────────────────────────────────
+GET {{baseUrl}}/api/organizations
+Authorization: Bearer {{ownerAccessToken}}
+
+
+### ─────────────────────────────────────────────
+###  [20] GET PENDING INVITES
+### ─────────────────────────────────────────────
+GET {{baseUrl}}/api/organizations/invites
+Authorization: Bearer {{ownerAccessToken}}

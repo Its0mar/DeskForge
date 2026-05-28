@@ -10,7 +10,7 @@ public class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
         builder.HasOne(u => u.Organization)
             .WithMany()
             .HasForeignKey(u => u.OrganizationId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.NoAction);
 
         // AppUser implements IAuditableEntity so it has CreatedById / LastModifiedById
         // as plain scalar audit fields — NOT foreign keys to another AppUser.

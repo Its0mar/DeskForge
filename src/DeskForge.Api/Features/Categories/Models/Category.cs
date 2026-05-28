@@ -3,7 +3,8 @@ using DeskForge.Api.Features.Teams.Models;
 
 namespace DeskForge.Api.Features.Categories.Models;
 
-public sealed class Category : AuditableEntity
+public sealed class 
+    Category : AuditableEntity
 {
     public required string Name { get; set; }
     public string? Description { get; set; }

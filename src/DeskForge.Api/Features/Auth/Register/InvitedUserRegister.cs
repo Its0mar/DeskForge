@@ -69,6 +69,7 @@ public static class AcceptInviteEndpoint
     {
         var invite = await db.Invitations
             .IgnoreQueryFilters()
+            .AsNoTracking()
             .FirstOrDefaultAsync(i => i.InviteToken == command.Token, ct);
 
         if (invite is null || !invite.IsValid)
@@ -93,7 +94,11 @@ public static class AcceptInviteEndpoint
             return InvitedUserRegisterErrors.IdentityError(identityResult);
         }
         
-        invite.Accept(appUser.Id);
+        var trackedInvite = await db.Invitations
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(i => i.InviteToken == command.Token, ct);
+        
+        trackedInvite!.Accept(appUser.Id);
         await db.SaveChangesAsync(ct);
         
         var token = await tokenProvider.GenerateTokenAsync(appUser, ct);

@@ -21,6 +21,7 @@ public sealed class CreateTicketCommandValidator : AbstractValidator<CreateTicke
 {
     public CreateTicketCommandValidator()
     {
+        RuleFor(x => x.CategoryId).NotEmpty() .WithMessage("CategoryId is required.");
         RuleFor(x => x.Title).Length(3,50).WithMessage("Title must be between 3 and 50 characters long.");
         RuleFor(x => x.Description).Length(20,1000).WithMessage("Description must be between 20 and 1000 characters long.");
         RuleFor(x => x.Priority).IsInEnum().WithMessage("Priority is invalid.");
@@ -32,8 +33,11 @@ public static class CreateTicketEndpoint
 {
     public static async Task<ProblemDetails> ValidateAsync(CreateTicketCommand command, AppDbContext db, CancellationToken ct)
     {
-        var categoryExit = await db.Categories.AnyAsync(c => c.Id == command.CategoryId, ct);
-        if (!categoryExit)
+        var categoryExists  = await db.Categories
+            .AsNoTracking()
+            .AnyAsync(c => c.Id == command.CategoryId, ct);
+        
+        if (!categoryExists)
         {
             return new ProblemDetails
             {
@@ -43,7 +47,10 @@ public static class CreateTicketEndpoint
             };
         }
         
-        var slaExists = await db.SlaPolicies.AnyAsync(s => s.Priority == command.Priority, ct);
+        var slaExists = await db.SlaPolicies
+            .AsNoTracking()
+            .AnyAsync(s => s.Priority == command.Priority, ct);
+        
         if (!slaExists)
         {
             return new ProblemDetails 
@@ -79,13 +86,24 @@ public static class CreateTicketEndpoint
         
         var sla = await db.SlaPolicies
             .FirstOrDefaultAsync(s => s.Priority == command.Priority, ct);
-
-        if (sla is not null)
+        
+        if (sla is null)
         {
-            var (response, resolution) = SlaDeadlineCalculator.CalculateDeadline(
-                sla, DateTime.UtcNow);
-            ticket.ApplySla(response, resolution);
+            return (
+                TypedResults.Problem(
+                    statusCode: StatusCodes.Status400BadRequest,
+                    title: "SLA Configuration Missing",
+                    detail: $"No SLA policy defined for {command.Priority} priority. Contact your administrator."
+                ),
+                null
+            );
         }
+
+        var (response, resolution) = SlaDeadlineCalculator.CalculateDeadline(
+            sla, DateTime.UtcNow);
+        
+        ticket.ApplySla(response, resolution);
+        
 
         db.Tickets.Add(ticket);
         await db.SaveChangesAsync(ct);

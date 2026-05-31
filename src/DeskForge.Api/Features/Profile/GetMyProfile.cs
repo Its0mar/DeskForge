@@ -1,4 +1,3 @@
-using DeskForge.Api.Features.Auth.Models;
 using DeskForge.Api.Infrastructure.Auth.Models;
 using DeskForge.Api.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
@@ -6,7 +5,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Wolverine.Http;
 
-namespace DeskForge.Api.Features.Auth;
+namespace DeskForge.Api.Features.Profile;
 
 [Tags("Auth")]
 public static class GetProfileEndpoint

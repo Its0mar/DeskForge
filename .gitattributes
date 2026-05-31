@@ -1,0 +1,3 @@
+# Ignore the entire front-end directory from GitHub's language statistics
+# so that the repository is classified primarily as C# (backend).
+src/deskforge-web/**/* linguist-detectable=false

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using DeskForge.Api.Features.Tickets;
+using DeskForge.Api.Features.Tickets.Assignment;
 using DeskForge.Api.Infrastructure;
 using DeskForge.Api.Infrastructure.Auth;
 using DeskForge.Api.Infrastructure.Exceptions;

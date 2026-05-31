@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Wolverine.Http;
 
-namespace DeskForge.Api.Features.Auth;
+namespace DeskForge.Api.Features.Auth.Passwords;
 
 public record ResetPasswordCommand(
     string Email, 

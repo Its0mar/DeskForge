@@ -1,9 +1,10 @@
 using DeskForge.Api.Common.Enums;
+using DeskForge.Api.Features.Tickets.Assignment;
 using DeskForge.Api.Features.Tickets.Events;
 using DeskForge.Api.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace DeskForge.Api.Features.Tickets;
+namespace DeskForge.Api.Features.Tickets.Events;
 
 public class TicketCreatedHandler(
     IDbContextFactory<AppDbContext> dbFactory,

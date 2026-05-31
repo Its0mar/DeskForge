@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Wolverine.Http;
 
-namespace DeskForge.Api.Features.Tickets;
+namespace DeskForge.Api.Features.Tickets.Core;
 
 [DynamicallyAccessedMembers((DynamicallyAccessedMemberTypes.PublicConstructors))]
 public sealed record CreateTicketCommand(string Title, string Description, TicketPriority Priority, Guid CategoryId);

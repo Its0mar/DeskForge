@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Wolverine.Http;
 
-namespace DeskForge.Api.Features.Tickets;
+namespace DeskForge.Api.Features.Tickets.Comments;
 
 public sealed record AddCommentRequest(string Content, bool IsInternal = false);
 

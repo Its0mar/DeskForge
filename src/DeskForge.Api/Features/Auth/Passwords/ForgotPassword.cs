@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Wolverine;
 using Wolverine.Http;
 
-namespace DeskForge.Api.Features.Auth;
+namespace DeskForge.Api.Features.Auth.Passwords;
 
 public sealed record ForgotPasswordRequest(string Identifier);
 

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Wolverine.Http;
 
-namespace DeskForge.Api.Features.Auth;
+namespace DeskForge.Api.Features.Profile;
 
 public record ChangePasswordCommand(
     string CurrentPassword, 

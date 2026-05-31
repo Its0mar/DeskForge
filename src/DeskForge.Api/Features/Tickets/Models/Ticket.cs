@@ -24,9 +24,9 @@ public class Ticket : AuditableEntity
     public Guid SubmittedByUserId { get; private set; }
     public string SubmitterName { get; private set; } = string.Empty;
     public string SubmitterEmail { get; private set; } = string.Empty;
-    
+
     public Category Category { get; set; }
-    
+
     private Ticket() { } // EF constructor
 
     public static Ticket Create(
@@ -52,6 +52,12 @@ public class Ticket : AuditableEntity
         };
     }
 
+    public void UpdateContent(string title, string description)
+    {
+        Title = title;
+        Description = description;
+    }
+
     public Result<Updated> AssignTo(Guid staffId)
     {
         switch (Status)
@@ -60,7 +66,7 @@ public class Ticket : AuditableEntity
                 return Error.Conflict(
                     "Ticket.Closed",
                     "Cannot assign a closed ticket.");
-            
+
             case TicketStatus.Resolved:
                 return Error.Conflict(
                     "Ticket.Resolved",
@@ -70,6 +76,7 @@ public class Ticket : AuditableEntity
         AssignedToStaffId = staffId;
         Status            = TicketStatus.InProgress;
         LastActivityAt    = DateTime.UtcNow;
+
         return Result.Updated;
     }
 
@@ -84,7 +91,7 @@ public class Ticket : AuditableEntity
         FirstResponseAt ??= DateTime.UtcNow;
         LastActivityAt = DateTime.UtcNow;
     }
-    
+
     public Result<Updated> Resolve()
     {
         if (Status != TicketStatus.InProgress)
@@ -94,6 +101,7 @@ public class Ticket : AuditableEntity
 
         Status         = TicketStatus.Resolved;
         LastActivityAt = DateTime.UtcNow;
+
         return Result.Updated;
     }
 
@@ -107,6 +115,7 @@ public class Ticket : AuditableEntity
         Status         = TicketStatus.Closed;
         ClosedAt       = DateTime.UtcNow;
         LastActivityAt = DateTime.UtcNow;
+
         return Result.Updated;
     }
 
@@ -119,6 +128,7 @@ public class Ticket : AuditableEntity
 
         Status         = TicketStatus.InProgress;
         LastActivityAt = DateTime.UtcNow;
+
         return Result.Updated;
     }
 
@@ -127,4 +137,10 @@ public class Ticket : AuditableEntity
         LastActivityAt = DateTime.UtcNow;
     }
 
+    public void Reclassify(Guid categoryId, TicketPriority priority)
+    {
+        CategoryId     = categoryId;
+        Priority       = priority;
+        LastActivityAt = DateTime.UtcNow;
+    }
 }

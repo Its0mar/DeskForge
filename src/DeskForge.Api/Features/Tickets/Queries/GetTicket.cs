@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Wolverine.Http;
 
-namespace DeskForge.Api.Features.Tickets;
+namespace DeskForge.Api.Features.Tickets.Queries;
 
 [Tags("Ticket")]
 public static class GetTicketEndpoint

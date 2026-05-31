@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Wolverine.Http;
 
-namespace DeskForge.Api.Features.Tickets;
+namespace DeskForge.Api.Features.Tickets.Assignment;
 
 public sealed record AssignTicketRequest(Guid StaffId);
 
@@ -37,7 +37,8 @@ public static class AssignTicketEndpoint
     [EndpointSummary("AssignTicket")]
     public static async Task<(Results<Ok, ProblemHttpResult>, TicketAssignedEvent?)> Handle([FromRoute] Guid ticketId, [FromBody]AssignTicketRequest request, AppDbContext db, CancellationToken ct)
     {
-        var ticket = await db.Tickets.FirstOrDefaultAsync(t => t.Id == ticketId, ct);
+        var ticket = await db.Tickets
+            .FirstOrDefaultAsync(t => t.Id == ticketId, ct);
 
         if (ticket is null)
         {
